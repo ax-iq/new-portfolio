@@ -1,0 +1,67 @@
+name: Deploy to Server
+
+on:
+  workflow_dispatch:
+    inputs:
+        sytem_version:
+          description: "The version of the system to be deployed"
+          type: string
+          required: true
+          default: '0.1.0'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Setup Ansible
+        uses: ./.github/actions/setup-ansible
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_host: ${{ vars.SSH_HOST }}
+          ssh_user: ${{ vars.USER }}
+        
+      - name: Deploy via Ansible
+        run: |
+          ansible-playbook ${{ github.workspace }}/infra/automation/ansible/deploy-playbook.yaml \
+          -i ${{ github.workspace }}/infra/automation/ansible/inventory.yaml \
+          -u ${{ vars.SSH_USER }} \
+          --extra-vars \ 
+          
+          "system_version=${{ github.event.inputs.sytem_version }} \
+          
+          cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }} \
+          frontend_node_version=${{ vars.FRONTEND_NODE_VERSION }} \
+          frontend_pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }} \
+
+          backend_pnpm_version=${{ vars.BACKEND_PNPM_VERSION }} \
+          backend_node_version=${{ vars.BACKEND_NODE_VERSION }} \
+
+          api_url=${{ vars.API_URL }} \
+          backend_base_url=${{ vars.BACKEND_BASE_URL }} \
+
+          database_client=${{ vars.DATABASE_CLIENT }} \
+          database_name=${{ vars.DATABASE_NAME }} \
+          database_username=${{ vars.DATABASE_USERNAME }} \
+          database_password=${{ secrets.DATABASE_PASSWORD }} \
+          database_port=${{ vars.DATABASE_PORT }} \
+          jwt_token=${{ secrets.JWT_SECRET }} \
+          app_keys=${{ secrets.APP_KEYS }} \
+          admin_jwt_secret=${{ secrets.ADMIN_JWT_SECRET }} \
+          encryption_key=${{ secrets.ENCRYPTION_KEY }} \
+          api_token_salt=${{ secrets.API_TOKEN_SALT }} \
+          transfer_token_salt=${{ secrets.TRANSFER_TOKEN_SALT }} \
+          database_filename=${{ vars.DATABASE_FILENAME }} \
+          strapi_telemetry_disabled=${{ vars.STRAPI_TELEMETRY_DISABLED }} \
+
+          node_env=${{ vars.NODE_ENV }}
+          admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}
+          
+          pimary_domain=${{ vars.PRIMARY_DOMAIN }}
+          site_name=${{ vars.SITE_NAME }}
+          repo_namespace=${{ vars.REPO_NAMESPACE }}
+          dns_email=${{ vars.DNS_EMAIL }}
+          certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}
+          ca_server=${{ vars.CA_SERVER }}"

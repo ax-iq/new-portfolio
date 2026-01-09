@@ -1,0 +1,28 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "new-frontend"
+		},
+		{
+			"path": "new-backend"
+		}
+	],
+	"settings": {
+		"workbench.colorTheme": "Material",
+		"workbench.iconTheme": "material-icon-theme",
+		"files.associations": {
+			"*.css": "tailwindcss"
+		},
+		"ansible.python.interpreterPath": "/bin/python3"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.theme-materialkit",
+			"pkief.material-icon-theme",
+			"bradlc.vscode-tailwindcss"
+		]
+	}
+}

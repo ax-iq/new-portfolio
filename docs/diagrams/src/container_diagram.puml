@@ -1,0 +1,50 @@
+@startuml container_diagram
+!include <office/Servers/database_server>
+!include <office/Servers/web_server>
+!include <office/Concepts/web_services>
+!include <office/Concepts/application_web>
+!include <office/Concepts/application_generic>
+
+!include <tupadr3/common>
+!include <tupadr3/font-awesome-5/react>
+!include <tupadr3/font-awesome-5/chrome>
+!include <tupadr3/font-awesome-5/safari>
+!include <tupadr3/font-awesome-5/database>
+
+!include <logos/astro>
+
+!include <C4/C4_Container>
+
+' left to right direction
+left header C4M: Container Diagram
+caption 'PORTFOLIO' system's containers
+
+Person(user, "User", "Customer seeking IT services.")
+Person(admin, "Administrator", "Person adding content to the portfolio.")
+
+System_Ext(user_browser, "User Browser", "The browser of the user.", $sprite="chrome")
+System_Ext(admin_browser, "Administrator Browser", "The browser of the administrator.", $sprite="safari")
+
+
+System_Boundary(itsm, "PORTFOLIO") {
+    Container(web_app, "Web APP", "Astro, React, Typescript, Node.js", "Delivers content using SSR", $sprite='astro')
+    Container(strapi_server, "Strapi Backend Server", "Koa HTTP Server, Node.js", "Delivers both Admin Panel SPA and json data.", $sprite='web_server')
+    Container(strapi_admin_panel, "Strapi Admin Panel", "React, SPA", "Interacts with Strapi Backend", $sprite='react')
+    ContainerDb(db, "Database", "SQLite", "Stores content", $sprite='database')
+}
+
+Rel(user, user_browser, "Uses", "")
+Rel(user_browser, web_app, "Requests webpage", "HTTPS")
+Rel(web_app, strapi_server, "Gets json data through api", "HTTP/JSON")
+Rel(strapi_server, db, "Reads from and writes to", "file protocol")
+
+Rel(admin, admin_browser, "Uses", "")
+Rel(admin_browser, strapi_server, "Requests webpage", "HTTPS")
+Rel(admin_browser, strapi_admin_panel, "Runs", "Javascript Runtime")
+Rel(strapi_admin_panel, strapi_server, "Gets json data through api", "HTTP/JSON")
+
+
+
+
+
+@enduml

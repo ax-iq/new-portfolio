@@ -1,0 +1,86 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 15s
+    timeout: 20s
+    api_version: "1.52"
+    # container_labels_to_metric_labels:
+    #   my.container.label: my-metric-label
+    #   my.other.container.label: my-other-metric-label
+    # excluded_images:
+    #   - grafana
+    # metrics: 
+    #   container.cpu.usage.percpu:
+    #     enabled: true
+    #   container.network.io.usage.tx_dropped:
+    #     enabled: false  
+
+processors:
+  batch:
+
+exporters:
+  file:
+    path: /var/oetelcol/.data/logs/output_logs.log
+
+  # debug:
+  #   verbosity: detailed
+
+  otlphttp/logs:
+    endpoint: "http://loki:3100/otlp"
+    tls:
+      insecure: true
+    
+  otlphttp/metrics:
+    metrics_endpoint: "http://prometheus:9090/api/v1/otlp/v1/metrics"
+    encoding: proto
+    tls:
+      insecure: true
+
+  otlp/traces:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+
+service:
+  # extensions: [file_storage]
+  # 
+  # Check the file pipeline.md to see an example
+  # of how the data can flow through the pipeline.
+  # 
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/logs]
+    metrics:
+      receivers: [docker_stats]
+      processors: [batch]
+      exporters: [otlphttp/metrics]
+
+    # 
+    # FOR Usage with vector.dev
+    # We prefer otel collector docker_stats receiver
+    # because it gives container names.
+    # 
+    # metrics:
+    #   receivers: [otlp]
+    #   processors: [batch]
+    #   exporters: [otlphttp/metrics]
+
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/traces]
+
+  telemetry:
+    logs:
+      level: info
+      encoding: json
+

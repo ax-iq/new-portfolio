@@ -1,0 +1,70 @@
+@startuml strapi_app_component_diagram
+!include <office/Servers/database_server>
+!include <office/Servers/domain_controller>
+!include <office/Concepts/node_generic>
+!include <office/Concepts/email>
+
+!include <tupadr3/common>
+!include <tupadr3/font-awesome-5/react>
+!include <tupadr3/font-awesome-5/chrome>
+!include <tupadr3/font-awesome-5/safari>
+!include <tupadr3/font-awesome-5/database>
+
+!include <logos/astro>
+
+!include <C4/C4_Component>
+
+' left to right direction
+left header C4M: Component Diagram
+
+caption Container 'Strapi Backend Server'
+
+Person(user, "User", "Customer seeking IT services.")
+Person(admin, "Administrator", "Person adding content to the portfolio.")
+
+System_Ext(user_browser, "User Browser", "The browser of the user.", $sprite="chrome")
+System_Ext(admin_browser, "Administrator Browser", "The browser of the administrator.", $sprite="safari")
+
+Container(web_app, "Web APP", "Astro, React, Typescript, Node.js", "Delivers content using SSR", $sprite='astro')
+Container(strapi_admin_panel, "Strapi Admin Panel", "React, SPA", "Interacts with Strapi Backend using the browser Fetch API.", $sprite='react')
+ContainerDb(db, "Database", "SQLite", "Stores content", $sprite='database')
+
+Container_Boundary(api, 'Strapi Backend Server') {
+    Component(global_middleware, "Global Middleware", "Typescript, src/middlewares/*.ts files", "", $sprite="node_generic")
+    Component(route, "Content-Type Route", "Typescript, src/api/[content-type]/routes/*.ts files", "", $sprite="node_generic")
+    Component(route_middleware, "Route Middleware", "Typescript, src/api/[content-type]/middlewares/*.ts files", "", $sprite="node_generic")
+    Component(controller, "Controller", "Typescript, src/api/[content-type]/controllers/*.ts files", "", $sprite="node_generic")
+    Component(service, "Service", "Typescript, src/api/[content-type]/services/*.ts files", "", $sprite="node_generic")
+    Component(document_service, "Document Service", "Typescript", "", $sprite="node_generic")
+    Component(query_engine, "Query Engine", "Typescript", "", $sprite="node_generic")
+    Component(model, "Model", "Typescript", "Strapi content-types and components", $sprite="node_generic")
+
+    Rel_D(global_middleware, route, "", "")
+    Rel_R(route, route_middleware, "", "")
+    Rel(route_middleware, controller, "", "")
+    Rel_R(controller, service, "", "")
+    Rel(service, document_service, "", "")
+    Rel(document_service, query_engine, "", "")
+    Rel_U(query_engine, model, "", "")
+
+    Rel_L(model, document_service, "", "")
+    Rel(document_service, service, "", "")
+    Rel_L(service, controller, "", "")
+    Rel(controller, route_middleware, "", "")
+    Rel_U(route_middleware, global_middleware, "", "")
+
+    Rel_R(model, db, "Read & write to", "file protocol")
+}
+
+
+Rel(user, user_browser, "Uses", "")
+Rel(user_browser, web_app, "Requests webpage", "HTTPS")
+
+Rel(admin, admin_browser, "Uses", "")
+
+Rel(admin_browser, strapi_admin_panel, "Runs", "Javascript Engine")
+Rel(strapi_admin_panel, admin_browser, "Uses", "Browser API")
+
+Rel(admin_browser, global_middleware, "Sends requests", "HTTPS")
+Rel(web_app, global_middleware, "Gets json data through REST api", "JSON / HTTP")
+@enduml

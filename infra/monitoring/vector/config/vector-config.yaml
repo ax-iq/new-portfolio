@@ -1,0 +1,115 @@
+api:
+  enabled: false
+  # address: 0.0.0.0:8686
+sources:
+  generate_docker_logs:
+    type: docker_logs
+    auto_partial_merge: true
+    include_containers:
+      - traefik
+      - frontend
+      - backend
+      - vector
+      - otel-collector-contrib
+      - loki
+      - prometheus
+      - tempo
+      - grafana
+    partial_event_marker_field: _partial
+    retry_backoff_secs: 2
+
+  vector_logs:
+    type: internal_logs
+
+  #
+  # METRICS already collected by otel collector
+  #
+  # host_metrics:
+  #   type: host_metrics
+  #   cgroups:
+  #     base: "/"
+  #     groups:
+  #       includes: 
+  #         # The conbination of "docker" and "docker/*"
+  #         # works in WSL but not sure in native linux.
+  #         - "docker"
+  #         - "docker/*"
+  #         # In case the about do not work.
+  #         - "system.slice/docker-*.scope"
+  #         - "/containerd/*"
+  #   collectors:
+  #     - cgroups
+  #   filesystem:
+  #     devices:
+  #       excludes:
+  #         - "binfmt_misc"
+  #   namespace: host
+  #   scrape_interval_secs: 15
+
+transforms:
+  remap_docker_logs:
+    inputs: ["generate_docker_logs"]
+    type: "remap"
+    file: "/etc/vector/remap_docker_logs.vrl"
+
+  #
+  # METRICS already collected by otel collector
+  #
+  # metric_to_log:
+  #   type: metric_to_log
+  #   inputs:
+  #     - host_metrics
+
+  # remap_host_metrics:
+  #   inputs: ["metric_to_log"]
+  #   type: "remap"
+  #   file: "/etc/vector/remap_docker_metrics.vrl"
+
+sinks:
+  console:
+    inputs:
+      - vector_logs
+    type: console
+    encoding:
+      codec: json
+
+  emit_otlp_logs:
+    inputs:
+      - remap_docker_logs
+    type: opentelemetry
+    protocol:
+      type: http
+      uri: http://otel-collector:4318/v1/logs
+      method: post
+      encoding:
+        codec: otlp
+      request:
+        headers:
+          content-type: application/x-protobuf
+  # 
+  # METRICS already collected by otel collector
+  # better because it contains container names.
+  # 
+  # emit_otlp_metrics:
+  #   inputs:
+  #     - remap_host_metrics
+  #   type: opentelemetry
+  #   protocol:
+  #     type: http
+  #     uri: http://otel-collector:4318/v1/metrics
+  #     method: post
+  #     encoding:
+  #       codec: otlp
+  #     request:
+  #       headers:
+  #         content-type: application/x-protobuf
+
+  # # FOR DEBUGING 
+  # emit_otlp_metrics:
+  #   type: file
+  #   inputs:
+  #     - remap_host_metrics
+  #   encoding:
+  #     codec: json 
+  #   path: /etc/vector/outputs.metrics.json
+

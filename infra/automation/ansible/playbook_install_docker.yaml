@@ -1,0 +1,79 @@
+- name: Install Docker and Docker Compose
+  hosts: servers
+  tasks:
+    - name: Uninstall old Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker.io
+          - docker-compose
+          - docker-compose-v2
+          - docker-doc
+          - podman-docker
+          - containerd
+          - runc
+        state: absent
+        autoremove: yes
+        purge: yes
+      become: yes
+
+    - name: Install prerequisite packages
+      ansible.builtin.apt:
+        name: 
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+      become: yes
+
+    - name: Create directory for Docker keyrings
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+      become: yes
+
+    - name: Download Docker's official GPG key and set Read Permission
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+      become: yes
+
+    - name: Add the repository to Apt sources
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/docker.sources
+        content: |
+          Types: deb
+          URIs: https://download.docker.com/linux/ubuntu
+          Suites: {{ ansible_facts['distribution_release'] }}
+          Components: stable
+          Signed-By: /etc/apt/keyrings/docker.asc
+      become: true
+
+    - name: Update APT package cache
+      ansible.builtin.apt:
+        update_cache: yes
+      become: true
+
+    - name: Install the Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: latest
+      become: yes
+
+    - name: Add User to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_facts['user_id'] }}"
+        groups: docker
+        append: yes
+
+    - name: Ensure Docker service is enabled and running
+      service:
+        name: docker
+        state: started
+        enabled: yes

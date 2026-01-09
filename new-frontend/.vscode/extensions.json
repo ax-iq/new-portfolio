@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "astro-build.astro-vscode",
+    "biomejs.biome",
+    "gruntfuggly.todo-tree",
+    "ms-azuretools.vscode-docker",
+    "ms-vscode.makefile-tools",
+    "oderwat.indent-rainbow",
+    "ms-vscode.theme-materialkit",
+    "pkief.material-icon-theme",
+    "bradlc.vscode-tailwindcss",
+    "humao.rest-client"
+  ],
+  "unwantedRecommendations": []
+}

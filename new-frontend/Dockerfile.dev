@@ -1,0 +1,15 @@
+ARG NODE_VERSION=23
+FROM node:${NODE_VERSION}-alpine AS base
+WORKDIR /new-frontend
+
+ARG SITE_NAME=https://frontend.localhost
+ENV SITE_NAME=${SITE_NAME}
+
+ARG PNPM_VERSION=10.26.2
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+
+ENV HOST=0.0.0.0
+ENV PORT=4321
+EXPOSE 4321
+CMD ["pnpm", "run", "dev"]
+

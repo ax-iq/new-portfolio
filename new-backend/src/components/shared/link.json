@@ -1,0 +1,32 @@
+{
+  "collectionName": "components_shared_links",
+  "info": {
+    "displayName": "Link"
+  },
+  "options": {},
+  "attributes": {
+    "href": {
+      "type": "string"
+    },
+    "isButton": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "icon": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    }
+  },
+  "config": {}
+}

@@ -1,0 +1,42 @@
+---
+import type { GetStaticPaths } from "astro";
+import localesConfig from "@/config/locales";
+import Layout from "@/layouts/Layout.astro";
+import { getLangFromUrl } from "@/utils/i18n/getLangFromUrl";
+import { usesTranslations } from "@/utils/i18n/useTranslations";
+import { fetchApi } from "@/utils/strapi/strapi";
+import type ApiResponseGlobal from "@/interfaces/ApiResponseGlobal";
+import type Rsp from "@/utils/strapi/rsp";
+import ContentType from "@/interfaces/ContentType";
+
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, max-age=3600, s-maxage=43200",
+);
+const locale = Astro.params.locale;
+
+// SideBar Data
+const globalResponse = await fetchApi<Rsp<ApiResponseGlobal>>({
+	endpoint: "global",
+	contentType: ContentType.Single,
+	locale: locale,
+});
+if (globalResponse.error) {
+	return Astro.redirect("/500");
+}
+const globalData = globalResponse.result?.data;
+
+export const getStaticPaths = (() => {
+	return localesConfig.locales.map((locale) => {
+		return { params: { locale } };
+	});
+}) satisfies GetStaticPaths;
+
+const lang = getLangFromUrl(Astro.url);
+const t = usesTranslations(lang);
+---
+
+<Layout {globalData}>
+    <div class="py-4">{t('page.contact')}</div>
+    <div class="py-4">{t('page.soon')}</div>
+</Layout>

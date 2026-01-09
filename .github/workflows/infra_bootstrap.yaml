@@ -1,0 +1,41 @@
+name: Create GCP Bucket for Terraform backend
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-bucket:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.1.7"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          # Using Direct Workload Identity Federation used instead
+          # service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Create Bucket
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
+        run: |
+          terraform apply \
+          -auto-approve \
+          -var="ssh_user=${{ vars.SSH_USER }}" \
+          -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
+          -var="project=${{ vars.GCP_PROJECT_ID }}" \
+          -var="bucket_name=${{ vars.BUCKET_NAME }}" \
+          -var="region=${{ vars.BUCKET_LOCATION }}" \
+          -var-file=${{ github.workspace }}/infra/automation/terraform/env/${{ github.event.inputs.environment }}/terraform.tfvars      

@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+	/* Default Text */
+	--color-body: var(--color-black);
+	/* Default background */
+	--color-body-bg: var(--color-stone-100);
+	/* Lighter text */
+	--color-secondary: var(--color-stone-200);
+	/* Dividers */
+	--color-secondary-bg: var(--color-stone-200);
+	/* Lighter than seconday */
+	--color-tertiary: #78dcca;
+	/* 
+        - Hover states
+        - Accents
+        - Wells
+    */
+	--color-tertiary-bg: #78dcca;
+	/* Bold */
+	--color-emphasis: #78dcca;
+	/* Default border */
+	--color-border: #78dcca;
+	/* Main theme color
+        - Hyperlinks + Buttons + Logo
+        - Focus style
+        - Component active state
+        - Form active state
+    */
+	--color-primary: #0046ff;
+	--color-primary-bg: var(--color-blue-100);
+	--color-primary-border: var(--color-blue-200);
+	--font-sans:
+		sans-serif, "Arial", "SF Pro Text", "SF Pro Icons", "Helvetica Neue",
+		"Helvetica";
+}

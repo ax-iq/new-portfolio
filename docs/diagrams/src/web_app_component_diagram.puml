@@ -1,0 +1,73 @@
+@startuml web_app_component_diagram
+!include <office/Servers/database_server>
+!include <office/Servers/domain_controller>
+!include <office/Concepts/node_generic>
+!include <office/Concepts/email>
+
+!include <office/Servers/web_server>
+!include <office/Concepts/web_services>
+
+!include <tupadr3/common>
+!include <tupadr3/font-awesome-5/react>
+!include <tupadr3/font-awesome-5/chrome>
+!include <tupadr3/font-awesome-5/safari>
+!include <tupadr3/font-awesome-5/database>
+!include <tupadr3/font-awesome-5/node_js>
+
+
+!include <C4/C4_Component>
+
+
+' left to right direction
+left header C4M: Component Diagram
+
+caption Container 'Web APP'
+
+Person(user, "User", "Customer seeking IT services.")
+Person(admin, "Administrator", "Person adding content to the portfolio.")
+
+
+System_Ext(user_browser, "User Browser", "The browser of the user.", $sprite="chrome")
+System_Ext(admin_browser, "Administrator Browser", "The browser of the administrator.", $sprite="safari")
+
+' System_Ext(strapi, "Strapi APP", "Koa HTTP Server, Node.js Api + SPA", "Allows ...", $sprite="node_generic")
+Container(strapi_server, "Strapi Backend Server", "Koa HTTP Server, Node.js", "Servers both Admin Panel website and json data as API", $sprite='web_server')
+Container(strapi_admin_panel, "Strapi Admin Panel", "React, SPA", "Interacts with Strapi Backend", $sprite='react')
+
+ContainerDb(db, 'Database',  'SQLite 3',   'Stores ...', $sprite='database_server')
+
+Container_Boundary(web_app_boundary, 'Web APP') {
+    Component(ssr_rendering_engine, "SSR Rendering Engine", "Astro SSR Runtime, @astrojs/node", "Server-side rendering of pages.", $sprite='node_js')
+    Component(page_routes, "Page Routes", "Astro Pages, pages/**/*.astro files", "Handle incoming http requests and map them to pages.", $sprite='node_generic')
+    Component(layout_components, "Layout Components", "Astro Layout components, layouts/**/*.astro files", "Provides consistent page structure.", $sprite='node_generic')
+    Component(ui_components, "UI Components", "React, Typescript, components/**/*.tsx files", "Renders reusable UI elements.", $sprite='node_generic')
+
+    Component(page_loader, "Page Loaders / Server Logic", "Astro Frontmatter code, Server Functions, Typescript", "Fetch data required to render pages.", $sprite='node_generic')
+    Component(api_client, "API Client", "Strapi Client, @strapi/client, Typescipt", "Communicate with backend api.", $sprite='node_generic')
+
+    Rel(ssr_rendering_engine, page_routes, "uses", "")
+
+    Rel(page_routes, layout_components, "uses", "ECMAScript Modules")
+    Rel(layout_components, ui_components, "uses", "ECMAScript Modules")
+    Rel(page_routes, ui_components, "uses", "ECMAScript Modules")
+
+    Rel(page_routes, page_loader, "uses", "")
+    Rel(page_loader, api_client, "uses", "")
+}
+
+
+Rel(user, user_browser, "Uses", "")
+Rel(user_browser, ssr_rendering_engine, "Requests webpage", "HTTPS")
+
+Rel(admin, admin_browser, "Uses", "")
+
+
+Rel(admin_browser, strapi_server, "Requests webpage", "HTTPS")
+Rel(admin_browser, strapi_admin_panel, "Runs", "Javascript Runtime")
+Rel(strapi_admin_panel, strapi_server, "Gets json data through api", "HTTP/JSON")
+
+Rel(api_client, strapi_server, "Gets json data through REST api", "JSON / HTTP")
+Rel(strapi_server, db, "Read & write to", "file protocol")
+
+
+@enduml

@@ -1,0 +1,28 @@
+services:
+  dev-container:
+    container_name: local-dev-container
+    user: "0"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - FRONTEND_NODE_VERSION=${FRONTEND_NODE_VERSION}
+        - BACKEND_NODE_VERSION=${BACKEND_NODE_VERSION}
+        - PNPM_VERSION=${FRONTEND_PNPM_VERSION}
+        - NVM_VERSION=${NVM_VERSION}
+    image: dev-container
+    # ports:
+    #   - 4321:4321
+
+    # env_file: ../.env
+    volumes:
+      # Correspond to the value of "workspaceFolder" in devcontainer.json
+      - ..:/${PWD}
+    # Overrides default command so Container don't shut down after the process ends.
+    command: sleep infinity
+    networks:
+      - dev-container-network
+
+networks:
+  dev-container-network:
+    name: dev-container-network

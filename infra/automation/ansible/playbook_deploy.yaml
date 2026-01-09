@@ -1,0 +1,56 @@
+- name: Deploy
+  hosts: servers
+  vars:
+    play_cwd: "{{ lookup('env','PWD') }}"
+  tasks:
+    - name: Ensure destination directory exists
+      ansible.builtin.file:
+        path: /portfolio-system
+        state: directory
+        mode: '0755'
+
+    - name: Copy docker compose file to server
+      ansible.builtin.copy:
+        src: "{{ play_cwd }}/compose.prod.yaml"
+        dest: /portfolio-system/compose.prod.yaml
+        # owner: "{{ ansible_facts['user_id'] }}"
+        # group: "{{ ansible_facts['user_id'] }}"
+        # mode: '0644'
+
+    - name: Copy monitoring directory to server
+      ansible.builtin.copy:
+        src: "{{ play_cwd }}/infra/monitoring"
+        dest: /portfolio-system/infra/monitoring
+
+    - name: Copy reverse-proxy directory to server
+      ansible.builtin.copy:
+        src: "{{ play_cwd }}/infra/reverse-proxy"
+        dest: /portfolio-system/infra/reverse-proxy
+
+    - name: Create .env file
+      ansible.builtin.template:
+        src: "{{ play_cwd }}/.env.runtime.j2"
+        dest: /portfolio-system/.env.production
+
+    - name: Start Docker Compose Services
+      community.docker.docker_compose_v2:
+        api_version: auto
+        project_src: /portfolio-system
+        files: 
+          - compose.prod.yaml
+        env_files: 
+          - .env.production
+        state: present
+        build: never
+        remove_orphans: true
+        pull: always
+
+    - name: Prune dangling images
+      community.docker.docker_prune:
+        containers: false
+        images: true
+        images_filters:
+          dangling: true
+
+    # TODO
+    # - name: Limit outbound data transfer

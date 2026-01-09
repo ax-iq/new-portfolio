@@ -1,0 +1,74 @@
+---
+import { BACKEND_BASE_URL } from "astro:env/server";
+import type { GetStaticPaths } from "astro";
+import Title from "@/components/atoms/Title/Title";
+import BlockRenderer from "@/components/organisms/BlockRenderer/BlockRenderer";
+import localesConfig from "@/config/locales";
+import type ApiResponse from "@/interfaces/ApiResponse";
+import ContentType from "@/interfaces/ContentType";
+import Layout from "@/layouts/Layout.astro";
+import { fetchApi } from "@/utils/strapi/strapi";
+import type ApiResponseGlobal from "@/interfaces/ApiResponseGlobal";
+import type Rsp from "@/utils/strapi/rsp";
+
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, max-age=3600, s-maxage=43200",
+);
+
+const locale = Astro.params.locale;
+
+// SideBar data
+const globalResponse = await fetchApi<Rsp<ApiResponseGlobal>>({
+	endpoint: "global",
+	contentType: ContentType.Single,
+	locale: locale,
+});
+if (globalResponse.error) {
+	return Astro.rewrite("/500");
+}
+const globalData = globalResponse.result?.data;
+
+// Experiences page data
+const expResponse = await fetchApi<Rsp<ApiResponse>>({
+	endpoint: "pages",
+	slug: "experiences",
+	contentType: ContentType.Collection,
+	locale: locale,
+});
+
+if (expResponse.error) {
+	return Astro.rewrite("/500");
+}
+
+const experiencesPage = expResponse.result?.data[0];
+
+// Needed for dynamic routing
+export const getStaticPaths = (() => {
+	return localesConfig.locales.map((locale) => {
+		return { params: { locale: locale } };
+	});
+}) satisfies GetStaticPaths;
+
+export const prerender = false;
+---
+
+<Layout {globalData}>
+    <div class="flex flex-col gap-4 py-4 pl-2 pr-4">
+        <!-- <Title label={experiencesPage.title.toUpperCase()}/> -->
+
+        {
+            experiencesPage?.blocks.map((block) => {
+                return (
+                    <div class="pb-4">
+                        <BlockRenderer
+                            block={block}
+                            currentLang={locale}
+                            backendBaseUrl={BACKEND_BASE_URL}
+                        />
+                    </div>
+                );
+            })
+        }
+    </div>
+</Layout>

@@ -1,0 +1,12 @@
+{
+    "telemetry.enableTelemetry": false,
+    "plantuml.diagramsRoot": "docs/diagrams/src",
+    "plantuml.exportOutDir": "docs/diagrams/out",
+    "plantuml.includepaths": ["docs/diagrams/style","docs/diagrams/src"],
+    // "plantuml.server": "http://localhost:8080",
+    // "plantuml.render": "PlantUMLServer",
+    "plantuml.render": "Local",
+    // "plantuml.jar": "path/to/plantuml.jar",
+    "plantuml.exportFormat": "svg",
+    "plantuml.exportSubFolder": true,
+}

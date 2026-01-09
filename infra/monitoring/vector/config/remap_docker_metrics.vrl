@@ -1,0 +1,105 @@
+# TODO REMOVE Metrics are now collected directly by Otel Collector.
+# TODO Fill in
+# container_id =
+# container_name = 
+
+unit = ""
+if contains(to_string!(.name), "seconds", case_sensitive: false) {
+    unit = "s"
+} else if contains(to_string!(.name), "bytes", case_sensitive: false) {
+    unit = "By"
+} else if contains(to_string!(.name), "percent", case_sensitive: false) {
+    unit = "%"
+}
+
+# TODO Map sum to counter
+
+resourceMetrics = [{
+    "resource": {
+        # TODO Change
+        "attributes": [
+            { "key": "service.name", "value": { "stringValue": .tags.cgroup } },
+            # {"key": "service.instance.id", "value": {"stringValue": container_id }}
+        ]
+    },
+    "scopeMetrics": [{
+        "scope": {
+            "name": "vector.host_metrics",
+            # "version": "1.0.0"
+        },
+        "metrics": [{
+            "name": .name,
+            "description": .name,
+            # TODO Change if there is a problem
+            "unit": unit
+            # "gauge" or "sum" key is added latter in the file.
+            # Optional
+            # , "metadata": {}
+        }]
+        #, "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    }]
+    #, "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+}]
+
+partial_data_points = [{"attributes": [
+                            {"key": "namespace", "value": {"stringValue": .namespace}},
+                            {"key": "kind", "value": {"stringValue": .kind}},
+                            {"key": "tags.cgroup", "value": {"stringValue": .tags.cgroup}},
+                            {"key": "tags.collector", "value": {"stringValue": .tags.collector}},
+                            {"key": "tags.host", "value": {"stringValue": .host}}
+                        ],
+                        # TODO Change if there is a problem
+                        # "startTimeUnixNano": to_unix_timestamp!(.timestamp, unit: "nanoseconds"),
+                        "timeUnixNano": to_unix_timestamp!(.timestamp, unit: "nanoseconds"),
+                        # Added latter in gauge (asDouble) and sum (asDouble) variables
+                        # "asDouble": .gauge.value,
+                        "flags": 0}]
+
+# Note: "gauge" or "sum" keys are expected by OTLP but not "counter" key
+gauge = {}
+sum = {}
+
+if (includes(keys!(.), "gauge")) {
+    gauge.dataPoints = partial_data_points
+
+    # if (unit == "By") {
+    #     gauge.dataPoints[0].asInt = .gauge.value
+    # } else {
+    #     gauge.dataPoints[0].asDouble = .gauge.value
+    # }
+
+    gauge.dataPoints[0].asDouble = .gauge.value
+    
+
+    # log(resourceMetrics[0].scopeMetrics.metrics[0], "debug")
+    resourceMetrics[0].scopeMetrics[0].metrics[0].gauge = gauge
+} else if (includes(keys!(.), "counter")) {
+    sum.dataPoints = partial_data_points
+
+    # if (unit == "By") {
+    #     sum.dataPoints[0].asInt = .counter.value
+    # } else {
+    #     sum.dataPoints[0].asDouble = .counter.value
+    # }
+
+    sum.dataPoints[0].asDouble = .counter.value
+
+    sum.aggregationTemporality = "AGGREGATION_TEMPORALITY_CUMULATIVE"
+    sum.isMonotonic = true
+
+    resourceMetrics[0].scopeMetrics[0].metrics[0].sum = sum
+} else {
+    log("Host Metrics do not contain \"gauge\" or \"counter\" key.")
+}
+
+.resourceMetrics = resourceMetrics
+
+del(.host)
+del(.name)
+del(.namespace)
+del(.tags)
+del(.timestamp)
+del(.kind)
+del(.counter)
+del(.counter)
+del(.gauge)

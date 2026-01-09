@@ -1,0 +1,10 @@
+old-frontend/
+frontend/
+backend/
+.env
+**/.terraform/
+.tmp
+node_modules
+.pnpm-store
+
+terraform.*

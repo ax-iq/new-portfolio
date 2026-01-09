@@ -1,0 +1,16 @@
+ARG BACKEND_NODE_VERSION=20
+FROM node:${BACKEND_NODE_VERSION}-alpine AS base
+WORKDIR /new-backend
+
+ARG NVM_VERSION=0.40.1
+ARG BACKEND_NODE_VERSION=20
+ENV BACKEND_NODE_VERSION=${BACKEND_NODE_VERSION}
+
+ARG PNPM_VERSION=10.3.0
+RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
+
+ENV HOST=0.0.0.0
+ENV PORT=1337
+EXPOSE 1337
+CMD ["sh", "-c", "pnpm install --config.confirmModulesPurge=false && pnpm run dev"]
+

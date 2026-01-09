@@ -1,0 +1,96 @@
+# TODO REMOVE: This config file is no longer used.
+# The configuration is done by passing
+# CLI flags directly in docker compose
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+entryPoints:
+  web:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          permanent: true
+          scheme: https
+          to: websecure
+
+  websecure:
+    address: :443
+    http:
+      tls:
+        options: modern
+ 
+certificatesResolvers:
+  le-cloudflare:
+    acme:
+      # The email is set as command line option in docker compose traefik service
+      email: example-email@gmail.com
+      storage: /var/traefik/certs/le-cloudflare-acme.json
+      keyType: RSA4096
+      dnsChallenge:
+        provider: cloudflare
+        resolvers:
+          - 1.1.1.1:53
+          - 8.8.8.8:53
+
+      # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      # TODO For prod use this
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      certificatesDuration: 2160
+
+log:
+  format: json
+  level: DEBUG
+
+accessLog:
+  # JSON format
+  format: json
+  # Filter on status codes, retry attempts and minimal duration
+  filters:
+    statusCodes:
+      - "200"
+      - "300-302"
+    retryAttempts: true
+    minDuration: "10ms"
+  fields:
+    # Keep all the fields by default
+    defaultMode: keep
+    names:
+      # Drop the Field ClientUserName
+      ClientUsername: drop
+    headers:
+      # Keep all the headers by default
+      defaultMode: keep
+      names:
+        # Redact the User-Agent header value
+        User-Agent: redact
+        # Drop the Authorization header value
+        Authorization: drop
+
+# We are using traefik v3 (so properties resourceAttributes and otlp are allowed.)
+tracing:
+  serviceName: traefik
+  resourceAttributes:
+    - container.name: traefik
+  otlp:
+    http:
+      endpoint: http://otel-collector:4318/v1/traces
+
+api:
+  insecure: true
+  dashboard: true
+
+ping:
+ entryPoint: traefik
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    defaultRule: "Host(`{{ normalize .Name }}`)"
+    exposedByDefault: false
+
+# observability:
+#   accessLogs: true
+#   metrics: true
+#   tracing: true

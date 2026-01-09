@@ -1,0 +1,15 @@
+{
+  "collectionName": "components_shared_side_menus",
+  "info": {
+    "displayName": "SideMenu"
+  },
+  "options": {},
+  "attributes": {
+    "sideMenuItems": {
+      "type": "component",
+      "component": "shared.side-menu-item",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

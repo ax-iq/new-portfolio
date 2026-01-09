@@ -1,0 +1,136 @@
+@startuml cicd_pipeline_diagram
+!include <tupadr3/common>
+!include <tupadr3/font-awesome-5/code>
+!include <tupadr3/font-awesome-5/node_js>
+!include <tupadr3/font-awesome-5/tags>
+!include <tupadr3/font-awesome-5/docker>
+!include <logos/pnpm>
+!include <logos/vitejs>
+!include <logos/vitest>
+!include <logos/semantic-release>
+!include <logos/ansible>
+
+
+' left to right direction
+
+caption CI/CD Pipeline
+
+
+skinparam node {
+    roundCorner 100
+    FontSize 20
+    BorderColor Red
+    ' BackgroundColor<<repo>> Blue
+    ' BorderColor<<repo>> Blue
+    ' FontName Courier
+    ' BorderColor black
+    BackgroundColor WhiteSmoke
+    ArrowFontName Impact
+    ArrowColor #FF6655
+    ArrowFontColor #777777
+}
+skinparam component {
+    roundCorner 15
+    FontSize 20
+    BackgroundColor DimGray
+    FontColor White
+    BorderColor Snow
+    BackgroundColor<<repo>> Blue
+    BorderColor<<repo>> White
+    FontColor<<repo>> White
+    ' FontName Courier
+    ' BorderColor black
+    ' BackgroundColor gold
+    ArrowFontName Helvetica
+    ArrowColor Blue
+    ArrowFontColor Blue
+    ArrowFontSize 20
+
+}
+skinparam queue {
+    FontSize 20
+    FontColor Blue
+    ' BackgroundColor<<repo>> Blue
+    ' BorderColor<<repo>> Blue
+    ' FontName Courier
+    BackgroundColor White
+    BorderColor Blue
+    ArrowFontName Impact
+    ArrowColor #FF6655
+    ArrowFontColor #777777
+}
+
+node "Version Control Server" {
+    [Git Repository] as repo <<repo>>
+}
+
+
+node "Github Runner (CI/CD Server)" as build_and_test_node{
+    queue "build_and_test_job" {
+        ' rectangle "My Component" <<$user>> as comp
+        [Checkout] <<$code>> as ch_test
+        [Setup Node.js] <<$node_js>> as sh
+        [Install \nDependencies] <<$pnpm>> as id
+        [Build] <<$vitejs>> as build
+        [Test] <<$vitest>> as test
+
+        ch_test --> sh
+        sh --> id
+        id --> build
+        build --> test
+    }
+}
+node "Github Runner (CI/CD Server)" as release_node {
+    queue "release_job" {
+        [Checkout] <<$code>> as ch_release
+        [Setup Node.js] <<$node_js>> as sh_release
+        [Install \nsemantic-release] <<$pnpm>> as i_sr
+        [release metadata] <<$semantic-release>> as release
+
+        ch_release --> sh_release
+        sh_release --> i_sr
+        i_sr --> release
+    }
+}
+
+node "Github Runner (CI/CD Server)" as push_to_registry_node {
+    queue "push_to_registry_job" {
+        [Checkout] <<$code>> as ch_push
+        [Extract Docker \nimage metadata] as extract_meta
+        [Log in to \nDocker Hub] <<$docker>> as log_in
+        [Setup \nDocker Builx] as setup_buildx
+        [Build and Push] as build_push
+
+        ch_push --> extract_meta
+        extract_meta --> log_in
+        log_in --> setup_buildx
+        setup_buildx --> build_push
+    }
+}
+
+node "Github Runner (CI/CD Server)" as deploy_node {
+    queue "deploy_job" {
+        [Checkout] <<$code>> as ch_deploy
+        [Setup Ansible] as setup_ansible
+        [Run Ansible \nPlaybook] <<$ansible>> as run_playbook
+
+        ch_deploy --> setup_ansible
+        setup_ansible --> run_playbook
+    }
+}
+
+node "Deployment Server" as deploy_server {
+    [Web App] as web_app
+    [Strapi Backend Server] as strapi_server
+}
+
+repo --> build_and_test_job: On pull request
+repo --> release_job: 1: On merge
+
+release_job --> push_to_registry_job: 2: Job Finised
+push_to_registry_job --> deploy_job: 3: Job Finished
+
+run_playbook --> web_app: Deploy
+run_playbook --> strapi_server: Deploy
+
+@enduml   

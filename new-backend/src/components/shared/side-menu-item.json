@@ -1,0 +1,16 @@
+{
+  "collectionName": "components_shared_side_menu_items",
+  "info": {
+    "displayName": "SideMenuItem"
+  },
+  "options": {},
+  "attributes": {
+    "color": {
+      "type": "string"
+    },
+    "label": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

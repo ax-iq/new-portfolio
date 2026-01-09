@@ -1,0 +1,30 @@
+{
+  "collectionName": "components_shared_nav_items",
+  "info": {
+    "displayName": "NavItem"
+  },
+  "options": {},
+  "attributes": {
+    "hasSideMenu": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "href": {
+      "type": "string"
+    },
+    "isButton": {
+      "type": "boolean"
+    },
+    "label": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    },
+    "alternativeText": {
+      "type": "string"
+    }
+  },
+  "config": {}
+}

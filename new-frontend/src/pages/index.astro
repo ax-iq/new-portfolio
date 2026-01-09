@@ -1,0 +1,13 @@
+---
+Astro.response.headers.set(
+	"Cache-Control",
+	"public, max-age=3600, s-maxage=43200",
+);
+
+// Redirection based on browser preferred language
+const browserPreferredLang = Astro.preferredLocale;
+console.log(browserPreferredLang);
+export const prerender = false;
+// TODO Update to /${browserPreferredLang}/
+return Astro.redirect(`/${browserPreferredLang}/experiences`);
+---

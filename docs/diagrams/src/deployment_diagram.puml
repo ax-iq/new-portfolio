@@ -1,0 +1,97 @@
+@startuml deployment_diagram
+!include <office/Servers/database_server>
+!include <office/Servers/domain_controller>
+!include <office/Servers/web_server>
+!include <office/Concepts/windows_powershell>
+!include <office/Concepts/application_web>
+!include <office/Concepts/application_generic>
+!include <office/Concepts/email>
+!include <office/Clouds/private_cloud>
+!include <office/Clouds/public_cloud>
+!include <office/Devices/workstation>
+!include <C4/C4_Deployment>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons2/traefikproxy_original.puml
+!include $ICONURL/devicons2/opentelemetry.puml
+!include $ICONURL/devicons2/prometheus_original.puml
+
+
+' !include <tupadr3/common>
+!include <tupadr3/font-awesome-5/react>
+!include <tupadr3/font-awesome-5/chrome>
+!include <tupadr3/font-awesome-5/safari>
+!include <tupadr3/font-awesome-5/database>
+!include <tupadr3/font-awesome-5/node_js>
+!include <tupadr3/font-awesome-5/cloudflare>
+!include <tupadr3/font-awesome-5/docker>
+!include <tupadr3/font-awesome-5/watchman_monitoring>
+
+!include <logos/astro>
+!include <logos/grafana>
+
+
+!include <office/Concepts/firewall_orange>
+!include <osa/firewall/firewall>
+
+skinparam linetype polyline
+hide stereotype
+left to right direction
+
+left header C4M: Deployment Diagram
+
+caption Deployment system 'PORTFOLIO'
+
+AddElementTag("fallback", $bgColor="FloralWhite")
+
+Deployment_Node(application_network, 'Application Virtual Private Network (VPC)', 'Network', $sprite='private_cloud') {
+    Deployment_Node(firewall, "Firewall", "GCP Firewall", $sprite="firewall_orange"){
+    }
+    AddProperty("CPU", "2 vCPU")
+    AddProperty("RAM", "2 GB")
+    AddProperty("HDD", "30 GB")
+    Deployment_Node(app, "app01.local", "Ubuntu", $sprite="web_server") {
+        Deployment_Node(reverse_proxy_container, "Load Balancer Container", "Docker Container", $sprite="docker"){
+            Container(reverse_proxy, "Reverse Proxy", "Traefik", "Offers reverse proxying and load balancing functionalities.", $sprite="traefikproxy_original"){
+            }        
+        }
+        Deployment_Node(web_app_container, "Web APP Container", "Docker Container", $sprite="docker"){
+            Container(web_app, "Web APP", "Astro, React, Typescript, Node.js", "Delivers content using SSR.", $sprite='astro')
+        }
+        Deployment_Node(strapi_server_container, "Strapi Server Container", "Docker Container", $sprite="docker"){
+            Container(strapi_server, "Strapi Backend Server", "Koa HTTP Server, Node.js", "Delivers both Admin Panel SPA and json data.", $sprite='node_js')
+        }
+
+        Deployment_Node(devops_system_containers, "Devops System \n(5 containers)", "Multiple Docker Containers", $sprite="docker", $tags="fallback"){
+            Container(monitoring_system, "Monitoring Stack", "OTEL-LGTM", "Offers monitoring and observability functionalities.", $sprite="watchman_monitoring"){
+            }        
+        }
+
+        Rel(reverse_proxy, monitoring_system, "Calls", "HTTP")
+        Rel(monitoring_system, web_app, "Pulls \ntelemetry data", "HTTP")
+        Rel(monitoring_system, strapi_server, "Pulls \ntelemetry data", "HTTP")
+        Rel(monitoring_system, reverse_proxy, "Pulls \ntelemetry data", "HTTP")
+
+    }
+}
+' Deployment_Node(storage_network, 'Storage', 'Network', $sprite='private_cloud') {
+'     AddProperty("CPU", "2")
+'     AddProperty("RAM", "2")
+'     AddProperty("SSD", "50")
+'     Deployment_Node(sql, "sql01.local", "CentOS", $sprite="database_server") {
+'         ContainerDb(db, "Database", "PostgreSQL", "Stores content", $sprite='database')
+    
+'     }
+' }
+
+
+Rel(external_system, firewall, "Calls", "HTTPS")
+Rel(firewall, reverse_proxy, "Sends to", "")
+Rel(reverse_proxy, web_app, "Calls", "HTTP")
+Rel(web_app, strapi_server, "Calls api", "HTTP")
+Rel(reverse_proxy, strapi_server, "Calls", "HTTP")
+
+' Rel(web_app, db, "Reads from and writes to", "JDBC")
+
+@enduml

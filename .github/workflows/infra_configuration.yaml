@@ -1,0 +1,25 @@
+# No longer used. Docker installation already done during server provisioning.
+name: Configure Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Ansible
+        uses: ./.github/actions/setup_ansible
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_host: ${{ vars.SSH_HOST }}
+          ssh_user: ${{ vars.USER }}
+
+      - name: Install Docker
+        run: |
+          ansible-playbook ${{ github.workspace }}/infra/automation/ansible/playbook_install_docker.yaml \
+          -i ${{ github.workspace }}/infra/automation/ansible/inventory.yaml \
+          -u ${{ vars.SSH_USER }}

@@ -1,0 +1,375 @@
+services:
+  reverse-proxy:
+    container_name: traefik
+    hostname: traefik
+    image: traefik:v3.6.5
+    command: >
+      --accesslog=true
+      --accesslog.format=json
+      --accesslog.fields.defaultmode=keep
+      --accesslog.fields.headers.defaultmode=keep
+      --accesslog.fields.headers.names.User-Agent=redact
+      --accesslog.fields.headers.names.Authorization=drop
+      --api=true
+      --api.dashboard=true
+      --api.insecure=true
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}=true
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.email=${DNS_EMAIL}
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.storage=/var/traefik/certs/le-cloudflare-acme.json
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.keytype=RSA4096
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.dnschallenge=true
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.dnschallenge.provider=cloudflare
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.dnschallenge.resolvers=1.1.1.1:53,8.8.8.8:53
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.caserver=${CA_SERVER}
+      --certificatesresolvers.${CERTIFICATE_RESOLVER_NAME}.acme.certificatesduration=2160
+      --entrypoints.websecure=true
+      --entrypoints.websecure.address=:443
+      --entrypoints.websecure.http.tls.options=modern
+      --entrypoints.web=true
+      --entrypoints.web.address=:80
+      --entrypoints.web.http.redirections.entrypoint.permanent=true
+      --entrypoints.web.http.redirections.entrypoint.scheme=https
+      --entrypoints.web.http.redirections.entrypoint.to=websecure
+      --global.checknewversion=false
+      --global.sendanonymoususage=false
+      --log=true
+      --log.format=json
+      --log.level=DEBUG
+      --ping=true
+      --ping.entrypoint=traefik
+      --providers.docker=true
+      --providers.docker.exposedbydefault=false
+      --tracing=true
+      --tracing.otlp=true
+      --tracing.otlp.http=true
+      --tracing.otlp.http.endpoint=http://otel-collector:4318/v1/traces
+      --tracing.resourceattributes.container\.name=traefik
+      --tracing.servicename=traefik
+
+    depends_on:
+      - frontend
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Use either config file or CLI flags; not both at the same time
+      # - ./infra/reverse-proxy/config/traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - traefik_storage:/var/traefik/certs/:rw
+    networks:
+      - portfolio-system
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik-https.entrypoints=websecure"
+      - "traefik.http.routers.traefik-https.tls.certresolver=le-cloudflare"
+      - "traefik.http.routers.traefik-https.rule=Host(`traefik.portfolio.${PRIMARY_DOMAIN}`)"
+      # - "traefik.http.routers.traefik-https.service=api@internal"
+      # - "traefik.http.services.api@internal.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik-https.service=reverse-proxy"
+      - "traefik.http.services.reverse-proxy.loadbalancer.server.port=8080"
+
+      - "traefik.http.middlewares.admin-auth.basicauth.users=${ADMIN_AUTH_CREDENTIALS}"
+      - "traefik.http.middlewares.rate-limit.ratelimit.average=100"
+      - "traefik.http.middlewares.rate-limit.ratelimit.period=1s"
+      - "traefik.http.routers.traefik-https.middlewares=admin-auth,rate-limit"
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 50M
+
+  frontend:
+    container_name: frontend
+    hostname: frontend
+    build: 
+      context: ./new-frontend
+      dockerfile: Dockerfile.dev
+      args:
+        - NODE_VERSION=${FRONTEND_NODE_VERSION}
+        - PNPM_VERSION=${FRONTEND_PNPM_VERSION}
+        - SITE_NAME=${SITE_NAME}
+    image: "${REPO_NAMESPACE}/frontend:${SYSTEM_VERSION}"
+    depends_on:
+      - backend
+    environment:
+      - API_URL=${API_URL}
+      - BACKEND_BASE_URL=${BACKEND_BASE_URL}
+    networks:
+      - portfolio-system
+    volumes:
+      # For dev only
+      - ./new-frontend:/new-frontend:rw
+    labels:
+      - "traefik.enable=true"
+      # FOR PROD
+      # - "traefik.http.routers.frontend-https.rule=HostRegexp(`(?i)^(?:www\\.)?portfolio\\.axiq\\.com$`)"
+      - "traefik.http.routers.frontend-https.entrypoints=websecure"
+      - "traefik.http.routers.frontend-https.tls.certresolver=le-cloudflare"
+      - "traefik.http.routers.frontend-https.rule=Host(`rd.${PRIMARY_DOMAIN}`)"
+      - "traefik.http.routers.frontend-https.service=frontend"
+      - "traefik.http.services.frontend.loadbalancer.server.port=4321"
+      - "traefik.http.routers.frontend-https.middlewares="
+
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1000M
+        reservations:
+          cpus: '0.25'
+          memory: 60M
+      
+  backend:
+    container_name: backend
+    hostname: backend
+    build: 
+      context: ./new-backend
+      dockerfile: Dockerfile.dev
+      args:
+        - BACKEND_NODE_VERSION=${BACKEND_NODE_VERSION}
+        - BACKEND_PNPM_VERSION=${BACKEND_PNPM_VERSION}
+    image: "${REPO_NAMESPACE}/backend:${SYSTEM_VERSION}"
+    volumes:
+      # For dev only
+      - ./new-backend:/new-backend:rw
+      # - ./new-backend/sqlite-prod-data:/opt/strapi-app/sqlite-prod-data
+    environment:
+      DATABASE_CLIENT: ${DATABASE_CLIENT}
+      DATABASE_HOST: strapiDB
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USERNAME: ${DATABASE_USERNAME}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV}
+      STRAPI_TELEMETRY_DISABLED: true
+      DATABASE_FILENAME: sqlite-prod-data/data.db
+    networks:
+      - portfolio-system
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend-https.entrypoints=websecure"
+      - "traefik.http.routers.backend-https.tls.certresolver=le-cloudflare"
+      - "traefik.http.routers.backend-https.rule=Host(`backend.portfolio.${PRIMARY_DOMAIN}`)"
+      - "traefik.http.routers.backend-https.service=backend"
+      - "traefik.http.services.backend.loadbalancer.server.port=1337"   
+      - "traefik.http.routers.backend-https.middlewares="
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1000M
+        reservations:
+          cpus: '0.25'
+          memory: 220M
+
+  vector:
+    container_name: vector
+    hostname: vector
+    image: timberio/vector:0.52.0-debian
+    user: "0"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./infra/monitoring/vector/config:/etc/vector:rw
+      # For metrics access
+      - /proc:/mnt/host/proc:ro
+      - /sys:/mnt/host/sys:ro
+    command: --config /etc/vector/vector-config.yaml
+    restart: unless-stopped
+    networks:
+      - portfolio-system
+    environment:
+      - VECTOR_LOG=debug
+      - PROCFS_ROOT=/mnt/host/proc
+      - SYSFS_ROOT=/mnt/host/sys
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 50M
+
+  otel-collector:
+    container_name: otel-collector-contrib
+    hostname: otel-collector
+    image: otel/opentelemetry-collector-contrib:0.142.0
+    user: "0"
+    restart: unless-stopped
+    command: --config=/etc/otelcol-contrib/config.yaml
+    volumes:
+      - ./infra/monitoring/otel-collector/config/otel-config.yaml:/etc/otelcol-contrib/config.yaml
+      # - /var/web_app/logs:/var/web_app/logs:ro
+      # - /var/strapi_app/logs:/var/strapi_app/logs:ro
+      # - /var/traefik/logs:/var/traefik/logs:ro
+      # Only for debugging
+      - ./infra/monitoring/otel-collector/.tmp/offset:/var/oetelcol/.data/offset:rw
+      - ./infra/monitoring/otel-collector/.tmp/logs:/var/oetelcol/.data/logs:rw
+
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    networks:
+      - portfolio-system
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 50M
+
+  loki:
+    container_name: loki
+    hostname: loki
+    image: grafana/loki:3.6.3
+    # ports:
+    #   - "3100:3100"
+    restart: unless-stopped
+    user: "0"
+    volumes:
+      - loki_storage:/tmp/loki:rw
+      - ./infra/monitoring/loki/config/loki-config.yaml:/etc/loki/local-config.yaml
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - portfolio-system
+    # Is not working
+    # logging:
+    #   driver: "json-file"
+    #   options:
+    #     max-size: "10m"
+    #     max-file: "3"
+
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 80M
+
+  prometheus:
+    container_name: prometheus
+    hostname: prometheus
+    image: prom/prometheus:v3.8.1
+    user: "0"
+    volumes:
+      - ./infra/monitoring/prometheus/config/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml:ro
+      - prometheus_storage:/prometheus:rw
+    command: 
+      - --config.file=/etc/prometheus/prometheus-config.yaml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-otlp-receiver
+      - --web.enable-remote-write-receiver
+    restart: unless-stopped
+    networks:
+      - portfolio-system
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 50M
+
+  tempo:
+    container_name: tempo
+    hostname: tempo
+    image: grafana/tempo:2.9.0
+    restart: unless-stopped
+    command: -config.file=/etc/tempo/config.yaml
+    volumes:
+      - ./infra/monitoring/tempo/config/tempo-config.yaml:/etc/tempo/config.yaml:ro
+      - tempo_storage:/var/tempo
+    networks:
+      - portfolio-system
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 150M
+        reservations:
+          cpus: '0.25'
+          memory: 50M
+
+  grafana:
+    container_name: grafana
+    hostname: grafana
+    image: grafana/grafana:12.3.1
+    restart: unless-stopped
+    environment:
+      # - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode
+      - GF_LOG_LEVEL=info
+      - GF_LOG_MODE=console
+      - GF_LOG_CONSOLE_FORMAT=json
+      # - GF_INSTALL_PLUGINS=https://grafana.com/api/plugins/grafana-lokiexplore-app/versions/1.0.32/download
+      - GF_INSTALL_PLUGINS=grafana-lokiexplore-app
+    # ports:
+    #   - '3000:3000'
+    volumes:
+      - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - 'grafana_storage:/var/lib/grafana'
+    networks:
+      - portfolio-system
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana-https.entrypoints=websecure"
+      - "traefik.http.routers.grafana-https.tls.certresolver=le-cloudflare"
+      - "traefik.http.routers.grafana-https.rule=Host(`grafana.portfolio.${PRIMARY_DOMAIN}`)"
+      - "traefik.http.routers.grafana-https.service=grafana"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.grafana-https.middlewares=admin-auth"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 100M
+        reservations:
+          cpus: '0.25'
+          memory: 90M
+
+networks:
+  portfolio-system:
+    name: portfolio-system
+    driver: bridge
+
+volumes:
+  grafana_storage:
+    name: grafana_storage
+  loki_storage:
+    name: loki_storage
+  prometheus_storage:
+    name: prometheus_storage
+  traefik_storage:
+    name: traefik_storage
+  tempo_storage:
+    name: tempo_storage
+
+# TODO Add recaptcha
+# TODO limit the outbond network traffic with a sofware (eg. limiter)
+# TODO Add Client side Analytics

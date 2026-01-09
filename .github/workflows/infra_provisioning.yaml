@@ -1,0 +1,66 @@
+name: Provision Server
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (prod/dev)"
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - dev
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.1.7"
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          # Using Direct Workload Identity Federation used instead
+          # service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Select Project
+        run: gcloud config set project ${{ vars.GCP_PROJECT_ID }}
+
+      # Terraform workspaces for dev/prod envinronments
+      - name: Select Workspace
+        run: terraform workspace select ${{ github.event.inputs.environment }} || terraform workspace new ${{ github.event.inputs.environment }}
+
+      - name: Init Terraform Directory / Download Providers
+        run: terraform -chdir=${{ github.workspace }}/infra/automation/terraform/01_infra init
+
+      - name: Format & Validate Terraform files
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
+        run: | 
+          terraform fmt -check
+          terraform validate
+
+      - name: Provision Server
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
+        run: |
+          terraform apply \
+          -auto-approve \
+          -var="ssh_user=${{ vars.SSH_USER }}" \
+          -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
+          -var="region=${{ vars.BUCKET_LOCATION }}" \
+          -var="project=${{ vars.GCP_PROJECT_ID }}" \
+          -var="bucket_name=${{ vars.BUCKET_NAME }}" \
+          -var-file=${{ github.workspace }}/infra/automation/terraform/env/${{ github.event.inputs.environment }}/terraform.tfvars

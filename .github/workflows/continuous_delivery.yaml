@@ -1,0 +1,129 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install semantic-release
+        run: |
+          npm install -g semantic-release \
+            @semantic-release/commit-analyzer \
+            @semantic-release/release-notes-generator \
+            @semantic-release/github \
+            @semantic-release/git \
+            @semantic-release/changelog
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+  push_to_registry:
+    name: Push To Docker Hub
+    runs-on: ubuntu-latest
+    needs: release
+    # environment: production
+    outputs:
+      system_version: ${{ steps.meta.outputs.tags_new_release_version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Extract Docker image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.DOCKER_USERNAME }}/my-image
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          provenance: true
+          sbom: true
+  
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: push_to_registry
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Setup Ansible
+        uses: ./.github/actions/setup-ansible
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh_host: ${{ vars.SSH_HOST }}
+          ssh_user: ${{ vars.USER }}
+
+      - name: Deploy via Ansible
+        run: |
+          ansible-playbook ${{ github.workspace }}/infra/automation/ansible/deploy-playbook.yaml \
+          -i ${{ github.workspace }}/infra/automation/ansible/inventory.yaml \
+          -u ${{ vars.SSH_USER }} \
+          --extra-vars \ 
+          
+          "system_version=${{ needs.push_to_registry.outputs.system_version }} \
+          
+          cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }} \
+          frontend_node_version=${{ vars.FRONTEND_NODE_VERSION }} \
+          frontend_pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }} \
+
+          backend_pnpm_version=${{ vars.BACKEND_PNPM_VERSION }} \
+          backend_node_version=${{ vars.BACKEND_NODE_VERSION }} \
+
+          api_url=${{ vars.API_URL }} \
+          backend_base_url=${{ vars.BACKEND_BASE_URL }} \
+
+          database_client=${{ vars.DATABASE_CLIENT }} \
+          database_name=${{ vars.DATABASE_NAME }} \
+          database_username=${{ vars.DATABASE_USERNAME }} \
+          database_password=${{ secrets.DATABASE_PASSWORD }} \
+          database_port=${{ vars.DATABASE_PORT }} \
+          jwt_token=${{ secrets.JWT_SECRET }} \
+          app_keys=${{ secrets.APP_KEYS }} \
+          admin_jwt_secret=${{ secrets.ADMIN_JWT_SECRET }} \
+          encryption_key=${{ secrets.ENCRYPTION_KEY }} \
+          api_token_salt=${{ secrets.API_TOKEN_SALT }} \
+          transfer_token_salt=${{ secrets.TRANSFER_TOKEN_SALT }} \
+          database_filename=${{ vars.DATABASE_FILENAME }} \
+          strapi_telemetry_disabled=${{ vars.STRAPI_TELEMETRY_DISABLED }} \
+
+          node_env=${{ vars.NODE_ENV }}
+          admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}
+          
+          pimary_domain=${{ vars.PRIMARY_DOMAIN }}
+          site_name=${{ vars.SITE_NAME }}
+          repo_namespace=${{ vars.REPO_NAMESPACE }}
+          dns_email=${{ vars.DNS_EMAIL }}
+          certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}
+          ca_server=${{ vars.CA_SERVER }}"

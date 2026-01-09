@@ -1,0 +1,104 @@
+@startuml deployment_diagram_monitoring_system
+!include <office/Servers/database_server>
+!include <office/Servers/domain_controller>
+!include <office/Servers/web_server>
+!include <office/Concepts/windows_powershell>
+!include <office/Concepts/application_web>
+!include <office/Concepts/application_generic>
+!include <office/Concepts/email>
+!include <office/Clouds/private_cloud>
+!include <office/Clouds/public_cloud>
+!include <office/Devices/workstation>
+!include <C4/C4_Deployment>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons2/traefikproxy_original.puml
+!include $ICONURL/devicons2/opentelemetry.puml
+!include $ICONURL/devicons2/prometheus_original.puml
+
+
+' !include <tupadr3/common>
+!include <tupadr3/font-awesome-5/react>
+!include <tupadr3/font-awesome-5/chrome>
+!include <tupadr3/font-awesome-5/safari>
+!include <tupadr3/font-awesome-5/database>
+!include <tupadr3/font-awesome-5/node_js>
+!include <tupadr3/font-awesome-5/cloudflare>
+!include <tupadr3/font-awesome-5/docker>
+!include <tupadr3/font-awesome-5/watchman_monitoring>
+
+!include <logos/astro>
+!include <logos/grafana>
+
+
+!include <office/Concepts/firewall_orange>
+!include <osa/firewall/firewall>
+
+skinparam linetype polyline
+hide stereotype
+' left to right direction
+
+left header C4M: Deployment Diagram
+
+caption Deployment system 'MONITORING'
+
+AddElementTag("fallback", $bgColor="FloralWhite")
+
+
+Deployment_Node(application_network, 'Application Virtual Private Network (VPC)', 'Network', $sprite='private_cloud') {
+    Deployment_Node(firewall, "Firewall", "GCP Firewall", $sprite="firewall_orange"){
+    }
+    AddProperty("CPU", "2 vCPU")
+    AddProperty("RAM", "2 GB")
+    AddProperty("HDD", "30 GB")
+    Deployment_Node(app, "app01.local", "Ubuntu", $sprite="web_server") {
+        Deployment_Node(devops_collector_container, "", "Docker Container", $sprite="docker", $tags="fallback"){
+            Container(devops_collector, "Opentelemetry \nCollector", "Process", "", $sprite="opentelemetry"){
+            }        
+        }
+        Deployment_Node(devops_metrics_database_container, "", "Docker Container", $sprite="docker", $tags="fallback"){
+            Container(devops_metrics_database, "Metrics Database", "Prometheus", "", $sprite="prometheus_original"){
+            }        
+        }
+        Deployment_Node(devops_logs_database_container, "", "Docker Container", $sprite="docker", $tags="fallback"){
+            Container(devops_logs_database, "Logs Database", "Grafana Loki", "Logs aggregator system.", $sprite="loki"){
+            }        
+        }
+        Deployment_Node(devops_traces_database_container, "", "Docker Container", $sprite="docker", $tags="fallback"){
+            Container(devops_traces_database, "Tracing Backend", "Grafana Tempo", "", $sprite="tempo"){
+            }        
+        }
+        Deployment_Node(devops_viz_container, "", "Docker Container", $sprite="docker", $tags="fallback"){
+            Container(devops_viz, "Analytics Platform", "Grafana", "", $sprite="grafana"){
+            }        
+        }
+        Rel(devops_collector, devops_logs_database, "Sends to", "HTTP")
+        Rel(devops_collector, devops_metrics_database, "Sends to", "HTTP")
+        Rel(devops_collector, devops_traces_database, "Sends to", "HTTP")
+        Rel(devops_logs_database, devops_viz, "Sends to", "HTTP")
+        Rel(devops_metrics_database, devops_viz, "Sends to", "HTTP")
+        Rel(devops_traces_database, devops_viz, "Sends to", "HTTP")
+
+        Deployment_Node(main_system_containers, "2 containers", "Multiple \nDocker Containers", $sprite="docker", $tags=""){
+            Container(main_system, "Main Apps", "Process", "", $sprite=""){
+            }        
+        }
+        Deployment_Node(reverse_proxy_container, "", "Docker Container", $sprite="docker"){
+            Container(reverse_proxy, "Reverse Proxy", "Traefik", "Requests routing.", $sprite="traefikproxy_original"){
+            }        
+        }
+
+        Rel(devops_collector, main_system, "Gets \ntelemetry data", "HTTP")
+        Rel(devops_collector, reverse_proxy, "Gets \ntelemetry data", "HTTP")
+
+        Rel(reverse_proxy, devops_viz, "Calls", "HTTP")
+    }
+
+    Rel(firewall, reverse_proxy, "Calls", "HTTPS")
+}
+Deployment_Node(external_system, "External System", "", $sprite="", $tags=""){
+}
+Rel(external_system, firewall, "Calls", "HTTPS")
+
+@enduml

@@ -1,0 +1,30 @@
+@startuml system_context_diagram
+!include <office/Servers/web_server>
+!include <C4/C4_Context>
+
+!include <tupadr3/font-awesome-5/chrome>
+!include <tupadr3/font-awesome-5/safari>
+
+skinparam linetype polyline
+left header C4M: System Context Diagram
+left to right direction
+caption Context of system 'PORTFOLIO'
+
+Person(user, "User", "Customer seeking IT services.")
+Person(admin, "Administrator", "Person adding content to the portfolio.")
+
+System_Ext(user_browser, "User Browser", "The browser of the user.", $sprite="chrome")
+System_Ext(admin_browser, "Administrator Browser", "The browser of the administrator.", $sprite="safari")
+
+Enterprise_Boundary(itd, "IT departament") {
+    System(portfolio_sm, "PORTFOLIO", "Gives professional profile information and allows content adding.", $sprite="web_server")
+}
+' Rel(user, portfolio_sm, "Uses", "HTTPS")
+Rel(user, user_browser, "Uses", "")
+Rel(admin, admin_browser, "Uses", "")
+
+Rel(user_browser, portfolio_sm, "Uses", "HTTPS")
+Rel(admin_browser, portfolio_sm, "Uses", "HTTPS")
+
+
+@enduml

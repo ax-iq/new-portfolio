@@ -1,0 +1,87 @@
+@startuml deployment_diagram_external_system
+!include <office/Servers/database_server>
+!include <office/Servers/domain_controller>
+!include <office/Servers/web_server>
+!include <office/Concepts/windows_powershell>
+!include <office/Concepts/application_web>
+!include <office/Concepts/application_generic>
+!include <office/Concepts/email>
+!include <office/Clouds/private_cloud>
+!include <office/Clouds/public_cloud>
+!include <office/Devices/workstation>
+!include <C4/C4_Deployment>
+
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/common.puml
+!include $ICONURL/devicons2/traefikproxy_original.puml
+!include $ICONURL/devicons2/opentelemetry.puml
+!include $ICONURL/devicons2/prometheus_original.puml
+
+
+' !include <tupadr3/common>
+!include <tupadr3/font-awesome-5/react>
+!include <tupadr3/font-awesome-5/chrome>
+!include <tupadr3/font-awesome-5/safari>
+!include <tupadr3/font-awesome-5/database>
+!include <tupadr3/font-awesome-5/node_js>
+!include <tupadr3/font-awesome-5/cloudflare>
+!include <tupadr3/font-awesome-5/docker>
+!include <tupadr3/font-awesome-5/watchman_monitoring>
+
+!include <logos/astro>
+!include <logos/grafana>
+
+
+!include <office/Concepts/firewall_orange>
+!include <osa/firewall/firewall>
+
+skinparam linetype polyline
+hide stereotype
+left to right direction
+
+left header C4M: Deployment Diagram
+
+caption Deployment system 'PORTFOLIO'
+
+AddElementTag("fallback", $bgColor="FloralWhite")
+
+
+Deployment_Node(home_network, 'Home', 'Network', $sprite='private_cloud') {
+    Deployment_Node(emp, 'emp01.local', 'FreeBSD', $sprite='workstation') {
+        Deployment_Node(browser1, "Web Browser", "Google Chrome, Mozilla Firefox, Apple Safari or Microsoft Edge", $sprite="chrome"){
+        }
+    }
+
+}
+Deployment_Node(office_network, 'Office', 'Network', $sprite='private_cloud') {
+    Deployment_Node(emp_admin, 'emp02.local', 'FreeBSD', $sprite='workstation') {
+        Deployment_Node(browser, "Web Browser", "Google Chrome, Mozilla Firefox, Apple Safari or Microsoft Edge", $sprite="chrome"){
+            Container(strapi_admin_panel, "Strapi Admin Panel", "Typescript, React, SPA", "Provides Strapi Headless CMS data management functionalities via the browser.", $sprite='react')        
+        }
+    }
+}
+Deployment_Node(cdn, "Centent Delivery Network (CDN)", "Cloudflare", $sprite="cloudflare"){
+}
+Deployment_Node(internet, "Internet", "", $sprite="public_cloud"){
+}
+Deployment_Node(application_network, 'Application Virtual Private Network (VPC)', 'Network', $sprite='private_cloud') {
+    Deployment_Node(firewall, "Firewall", "GCP Firewall", $sprite="firewall_orange"){
+    }
+    AddProperty("CPU", "2 vCPU")
+    AddProperty("RAM", "2 GB")
+    AddProperty("HDD", "30 GB")
+    Deployment_Node(app, "app01.local", "Ubuntu", $sprite="web_server") {
+        Deployment_Node(portfolio_system_containers, "PORTFOLIO \nContainers", "Docker Containers (8)", $sprite="docker"){
+            Container(portfolio_system, "Portfolio System", "", "", $sprite=""){
+            }        
+        }
+    }
+}
+
+Rel(strapi_admin_panel, internet, "Call", "HTTPS")
+Rel(internet, cdn, "Routes", "")
+Rel(cdn, firewall, "Routes", "")
+Rel(firewall, portfolio_system, "Calls", "HTTPS")
+
+Rel(browser1, internet, "Call", " HTTPS")
+

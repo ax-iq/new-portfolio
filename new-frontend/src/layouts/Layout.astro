@@ -1,0 +1,64 @@
+---
+import NavBar from "@/components/organisms/NavBar/NavBar";
+import "@/styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Footer from "@/components/organisms/Footer/Footer";
+import type ApiResponseGlobal from "@/interfaces/ApiResponseGlobal";
+import ContentType from "@/interfaces/ContentType";
+import { fetchApi } from "@/utils/strapi/strapi";
+
+const currentPagePath = Astro.url.pathname;
+const locale = Astro.params.locale;
+
+const { globalData } = Astro.props;
+---
+
+<!doctype html>
+<html lang={locale} class="">
+	<head>
+		<link rel="sitemap" href="/sitemap-index.xml" />
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<title>{globalData.defaultSeo.metaTitle}</title>
+		<meta name="description" content={globalData.siteDescription} />
+		<!-- Open Graph -->
+		<meta property="og:title" content={globalData.defaultSeo.metaTitle} />
+		<meta property="og:description" content={globalData.defaultSeo.metaDescription} />
+		<meta property="og:image" content={globalData.defaultSeo.shareImage.url} />
+		<meta property="og:url" content={globalData.defaultSeo.siteUrl} />
+		<!--  -->
+		<!-- Twitter -->
+		<meta name="Twitter:card" content="summary_large_image" />
+		<meta name="Twitter:title" content={globalData.defaultSeo.metaTitle} />
+		<meta name="Twitter:description" content={globalData.defaultSeo.metaDescription} />
+		<meta name="Twitter:image" content={globalData.defaultSeo.shareImage.url} />
+		<!--  -->
+		<ClientRouter />
+	</head>
+	<body class="flex flex-col lg:flex-row h-screen overflow-hidden bg-body-bg">
+		{
+			locale ? <NavBar 
+						navBarData={globalData.navBar} 
+						currentPagePath={currentPagePath} 
+						locale={locale} client:load/> 
+					: null
+		}
+		<main class="flex flex-col w-full overflow-y-auto items-center">
+			<slot />
+			<div class="w-full">
+				<Footer footerData={globalData.footer}/>
+			</div>
+		</main>
+
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+</style>

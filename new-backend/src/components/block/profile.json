@@ -1,0 +1,20 @@
+{
+  "collectionName": "components_block_profiles",
+  "info": {
+    "displayName": "Profile"
+  },
+  "options": {},
+  "attributes": {
+    "description": {
+      "type": "richtext"
+    },
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    }
+  },
+  "config": {}
+}

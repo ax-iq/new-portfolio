@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "hashicorp.terraform",
+        "redhat.ansible",
+        "jebbs.plantuml",
+        "ms-vscode-remote.remote-containers"
+    ]
+}

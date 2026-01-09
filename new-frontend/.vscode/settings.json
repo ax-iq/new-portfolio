@@ -1,0 +1,29 @@
+{
+	"editor.formatOnSave": true,
+	"css.validate": false,
+	"scss.validate": false,
+	"editor.codeActionsOnSave": {
+		"source.organizeImports.biome": "explicit"
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"stylelint.validate": ["css", "scss"],
+	"files.associations": {
+		"*.css": "tailwindcss"
+	},
+	"editor.quickSuggestions": {
+		"strings": "on"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"workbench.colorTheme": "Material",
+	"workbench.iconTheme": "material-icon-theme"
+}

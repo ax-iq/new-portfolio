@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_block_experience_grids",
+  "info": {
+    "displayName": "ExperienceGrid"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "experiences": {
+      "type": "component",
+      "component": "block.experience",
+      "repeatable": true
+    }
+  },
+  "config": {}
+}

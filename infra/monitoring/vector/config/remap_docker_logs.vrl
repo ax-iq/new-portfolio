@@ -1,0 +1,54 @@
+json_log = parse_json(.message) ?? parse_key_value(.message) ?? {"level": "info"}
+severity_text = if includes(["emerg", "err", "crit", "alert", "error"], json_log.level) {
+    "ERROR"
+} else if json_log.level == "warning" {
+    "WARN"
+} else if json_log.level == "debug" {
+    "DEBUG"
+} else if includes(["info", "notice", "http"], json_log.level) {
+    "INFO"
+} else {
+    json_log.level
+}
+
+.resourceLogs = [{
+    "resource": {
+        "attributes": [
+            { "key": "source_type", "value": { "stringValue": .source_type } },
+            { "key": "container.name", "value": { "stringValue": .container_name } },
+            { "key": "container.instance.id", "value": { "stringValue": .container_id } },
+            { "key": "container.version", "value": { "stringValue": .image } },
+            { "key": "container.namespace", "value": { "stringValue": "portfolio-system" } },
+            { "key": "host.hostname", "value": { "stringValue": .host } }
+        ]
+    },
+    "scopeLogs": [{
+        "scope": {
+            # TODO
+            "name": "to_be_changed_after_parsing_message"
+        },
+        "logRecords": [{
+            "timeUnixNano": to_unix_timestamp!(.timestamp, unit: "nanoseconds"),
+            "body": { "stringValue": .message },
+            "severityText": severity_text,
+            # "severity_number": 4,
+            "attributes": [
+                { "key": "docker.stream", "value": { "stringValue": .stream } },
+                { "key": "docker.time", "value": { "stringValue": to_string!(.timestamp) } },
+                { "key": "docker.container_created_at", "value": { "stringValue": to_string!(.container_created_at) } }
+                # TODO Add docker labels
+            ]
+        }]
+    }]
+}]
+
+del(.container_created_at)
+del(.container_id)
+del(.container_name)
+del(.host)
+del(.image)
+del(.label)
+del(.message)
+del(.source_type)
+del(.stream)
+del(.timestamp)
