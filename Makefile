@@ -5,8 +5,8 @@ build-frontend:
 	pnpm run --dir=new-frontend build
 
 install-frontend-dependences:
-	pnpm install --dir=new-frontend --dangerously-allow-all-builds && \
-		pnpm --dir=new-frontend exec playwright install
+	pnpm install --dir=new-frontend --dangerously-allow-all-builds
+	pnpm --dir=new-frontend exec playwright install
 
 compose-dev:
 	docker compose -f compose.dev.yaml up --build --remove-orphans
