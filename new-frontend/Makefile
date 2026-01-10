@@ -3,7 +3,7 @@ pre-commit: format lint test
 
 ci-install-dependencies-frontend:
 	pnpm install --dangerously-allow-all-builds
-	pnpm exec playwright install
+	pnpm dlx playwright install --with-deps
 ci-build:
 	pnpm run build
 ci-lint: lint
