@@ -23,28 +23,29 @@ jobs:
       - name: Checkout Code Source
         uses: actions/checkout@v5
 
-      - name: Set Env Variables
+      - name: Set Variables
+        id: set_vars
         run: |
           case "${{ matrix.app.name }}" in 
             frontend)
-              echo "PNPM_VERSION=${{ vars.FRONTEND_PNPM_VERSION }}" >> $GITHUB_ENV
-              echo "NODE_VERSION=${{ vars.FRONTEND_NODE_VERSION }}" >> $GITHUB_ENV
+              echo "pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }}" >> $GITHUB_OUTPUT
+              echo "node_version=${{ vars.FRONTEND_NODE_VERSION }}" >> $GITHUB_OUTPUT
               ;;
             backend)
-              echo "PNPM_VERSION=${{ vars.BACKEND_PNPM_VERSION }}" >> $GITHUB_ENV
-              echo "NODE_VERSION=${{ vars.BACKEND_NODE_VERSION }}" >> $GITHUB_ENV
+              echo "pnpm_version=${{ vars.BACKEND_PNPM_VERSION }}" >> $GITHUB_OUTPUT
+              echo "node_version=${{ vars.BACKEND_NODE_VERSION }}" >> $GITHUB_OUTPUT
               ;;
           esac
 
       - name: Install Pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${PNPM_VERSION}
+          version: ${{ steps.set_vars.outputs.pnpm_version }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${NODE_VERSION}
+          node-version: ${{ steps.set_vars.outputs.node_version }}
           cache: "pnpm"
 
       - name: Install Dependencies
