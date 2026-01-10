@@ -25,7 +25,7 @@ jobs:
 
       - name: Set Env Variables
         run: |
-          case "${{ matrix.app.name }} in 
+          case "${{ matrix.app.name }}" in 
             frontend)
               echo "PNPM_VERSION=${{ vars.FRONTEND_PNPM_VERSION }}" >> GITHUB_ENV
               echo "NODE_VERSION=${{ vars.FRONTEND_NODE_VERSION }}" >> GITHUB_ENV
