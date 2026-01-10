@@ -49,7 +49,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: make ci-install-${{ matrix.app.name }}-dependences
+        run: make ci-install-dependencies-${{ matrix.app.name }}
       - name: Build
         run: make ci-build-${{ matrix.app.name }}
       - name: Lint

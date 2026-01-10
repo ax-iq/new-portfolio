@@ -1,7 +1,7 @@
 # Used by git pre-commit hook
 pre-commit: format lint test
 
-ci-install-dependences-frontend:
+ci-install-dependencies-frontend:
 	pnpm install --dangerously-allow-all-builds
 	pnpm exec playwright install
 ci-build:
