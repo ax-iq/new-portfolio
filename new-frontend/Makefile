@@ -8,9 +8,9 @@ ci-build-frontend:
 	pnpm run build
 ci-lint-frontend: lint
 ci-test-frontend: test
-ci-check-frontend: check
-ci-check-types:
+ci-check-types-frontend:
 	pnpm run check:types
+ci-check-frontend: check
 
 check: lint test
 lint: lint-lang lint-format
