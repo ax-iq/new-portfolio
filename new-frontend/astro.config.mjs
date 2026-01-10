@@ -8,7 +8,7 @@ import { defineConfig, envField } from "astro/config";
 import { loadEnv } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-var SITE_NAME = ""
+let SITE_NAME = ""
 if (process.env.SITE_NAME) {
 	SITE_NAME = process.env.SITE_NAME
 } else {
