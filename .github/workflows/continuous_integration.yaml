@@ -16,13 +16,13 @@ jobs:
             dir: 'new-frontend'
           }
         ]
-    defaults:
-      run:
-        working-directory:  ${{ github.workspace }}/${{ matrix.app.dir }}
+    # defaults:
+    #   run:
+    #     working-directory:  ${{ github.workspace }}/${{ matrix.app.dir }}
     steps:
       - name: Checkout Code Source
         uses: actions/checkout@v5
-        
+
       - name: Set Env Variables
         run: |
           case "${{ matrix.app.name }} in 
