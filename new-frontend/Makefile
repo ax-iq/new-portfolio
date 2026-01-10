@@ -9,11 +9,11 @@ ci-build-frontend:
 ci-lint-frontend: lint
 ci-test-frontend: test
 ci-check-frontend: check
-
+ci-check-types:
+	pnpm run check:types
 
 check: lint test
-
-lint: lint-lang
+lint: lint-lang lint-format
 
 run:
 	pnpm dev
@@ -23,6 +23,9 @@ format:
 
 lint-lang:
 	pnpm run lint:lang
+
+lint-format:
+	pnpm run lint:format
 
 test:
 	pnpm run test:ci
