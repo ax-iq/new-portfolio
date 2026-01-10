@@ -13,7 +13,7 @@ jobs:
         app: [
           {
             name: 'frontend', 
-            dir: './new-frontend'
+            dir: 'new-frontend'
           }
         ]
     defaults:
