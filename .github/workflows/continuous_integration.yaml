@@ -18,7 +18,7 @@ jobs:
         ]
     defaults:
       run:
-        working-directory: ${{ matrix.app.dir }}
+        working-directory:  ${{ github.workspace }}/${{ matrix.app.dir }}
     steps:
       - name: Set Env Variables
         run: |
