@@ -51,7 +51,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "pnpm install && cd new-frontend && pnpm exec playwright install-deps && pnpm exec playwright install"
+	"postCreateCommand": "pnpm install --dangerously-allow-all-builds && cd new-frontend && pnpm exec playwright install-deps && pnpm exec playwright install"
 
 	// Configure tool-specific properties.
 	// "customizations": {},

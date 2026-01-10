@@ -50,9 +50,11 @@ jobs:
 
       - name: Install Dependencies
         run: make ci-install-dependencies-${{ matrix.app.name }}
-      - name: Build
-        run: make ci-build-${{ matrix.app.name }}
       - name: Lint
         run: make ci-lint-${{ matrix.app.name }}
+      - name: Build
+        run: make ci-build-${{ matrix.app.name }}
+      - name: Check Types
+        run: make ci-check-types-${{ matrix.app.name }}        
       - name: Test
         run: make ci-test-${{ matrix.app.name }}
