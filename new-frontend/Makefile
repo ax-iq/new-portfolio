@@ -4,10 +4,10 @@ pre-commit: format lint test
 ci-install-dependencies-frontend:
 	pnpm install --dangerously-allow-all-builds
 	pnpm dlx playwright install --with-deps
-ci-build:
+ci-build-frontend:
 	pnpm run build
-ci-lint: lint
-ci-test: test
+ci-lint-frontend: lint
+ci-test-frontend: test
 ci-check-frontend: check
 
 
