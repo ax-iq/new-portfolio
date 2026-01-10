@@ -8,21 +8,50 @@ on:
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [
+          {
+            name: 'frontend', 
+            dir: './new-frontend'
+          }
+        ]
+    defaults:
+      run:
+        working-directory: ${{ matrix.app.dir }}
     steps:
-      - name: Checkout code source
+      - name: Set Env Variables
+        run: |
+          case "${{ matrix.app.name }} in 
+            frontend)
+              echo "PNPM_VERSION=${{ vars.FRONTEND_PNPM_VERSION }}" >> GITHUB_ENV
+              echo "NODE_VERSION=${{ vars.FRONTEND_NODE_VERSION }}" >> GITHUB_ENV
+              ;;
+            backend)
+              echo "PNPM_VERSION=${{ vars.BACKEND_PNPM_VERSION }}" >> GITHUB_ENV
+              echo "NODE_VERSION=${{ vars.BACKEND_NODE_VERSION }}" >> GITHUB_ENV
+              ;;
+          esac
+
+      - name: Checkout Code Source
         uses: actions/checkout@v5
-      - name: Install pnpm
+
+      - name: Install Pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ vars.FRONTEND_PNPM_VERSION}}
+          version: ${PNPM_VERSION}
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ vars.FRONTEND_NODE_VERSION}}
+          node-version: ${NODE_VERSION}
           cache: "pnpm"
-      - name: Install dependencies
-        run: make install-frontend-dependences
+
+      - name: Install Dependencies
+        run: make ci-install-${{ matrix.app.name }}-dependences
       - name: Build
-        run: make build-frontend
+        run: make ci-build-${{ matrix.app.name }}
+      - name: Lint
+        run: make ci-lint-${{ matrix.app.name }}
       - name: Test
-        run: make test-frontend
+        run: make ci-test-${{ matrix.app.name }}
