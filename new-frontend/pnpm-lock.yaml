@@ -61,8 +61,8 @@ importers:
         specifier: ^2.2.0
         version: 2.2.0(react@19.2.0)
       '@strapi/client':
-        specifier: ^1.5.0
-        version: 1.5.0
+        specifier: ^1.6.0
+        version: 1.6.0
       '@tailwindcss/typography':
         specifier: ^0.5.19
         version: 0.5.19(tailwindcss@4.1.14)
@@ -1531,8 +1531,8 @@ packages:
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
 
-  '@strapi/client@1.5.0':
-    resolution: {integrity: sha512-W3+GRtm0RyRWbOeMeUl0JQylCJVjgs58mmN20kMjnmxzcw5L4lxgdxCMIjc1fLtOEcpo3qlzf96c4Hl/lJFSHA==}
+  '@strapi/client@1.6.0':
+    resolution: {integrity: sha512-lSJMxF0JuZzZmpBS/Fpzj4ZPKZsB3leVAoQjdeY4IJ57S2FlnFkm/mM35bcHbri5UdbCUhfiL6QtuoA8p8Fp2w==}
     engines: {node: '>=20.18.2 <=22.x.x'}
 
   '@swc/helpers@0.5.17':
@@ -5331,7 +5331,7 @@ snapshots:
 
   '@standard-schema/spec@1.0.0': {}
 
-  '@strapi/client@1.5.0':
+  '@strapi/client@1.6.0':
     dependencies:
       debug: 4.4.0
       qs: 6.14.0
