@@ -20,6 +20,9 @@ jobs:
       run:
         working-directory:  ${{ github.workspace }}/${{ matrix.app.dir }}
     steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+        
       - name: Set Env Variables
         run: |
           case "${{ matrix.app.name }} in 
@@ -32,9 +35,6 @@ jobs:
               echo "NODE_VERSION=${{ vars.BACKEND_NODE_VERSION }}" >> GITHUB_ENV
               ;;
           esac
-
-      - name: Checkout Code Source
-        uses: actions/checkout@v5
 
       - name: Install Pnpm
         uses: pnpm/action-setup@v4
