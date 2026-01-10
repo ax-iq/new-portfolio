@@ -2,7 +2,7 @@
 	"name": "new-frontend",
 	"type": "module",
 	"version": "0.0.1",
-	"packageManager": "pnpm@10.26.0",
+	"packageManager": "pnpm@10.26.2",
 	"scripts": {
 		"dev": "ASTRO_TELEMETRY_DISABLED=1 && astro dev",
 		"build": "export ASTRO_TELEMETRY_DISABLED=1 && astro build",
