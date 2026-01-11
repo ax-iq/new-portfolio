@@ -1,0 +1,27 @@
+---
+branches: 
+  - main
+
+plugins:
+  - "@semantic-release/commit-analyzer"
+  - "@semantic-release/release-notes-generator"
+  - 
+    - "@semantic-release/changelog"
+    - changelogFile: "CHANGELOG.md"
+  - "@semantic-release/npm"
+  - 
+    - "@semantic-release/git"
+    - assets: 
+      - "package.json"
+      - "CHANGELOG.md"
+    - message: >-
+        chore(release): 
+        Release <%= nextRelease.version %> - 
+        <%= new Date().toLocaleDateString('en-US', 
+        {year: 'numeric', month: 'short', 
+        day: 'numeric', hour: 'numeric', 
+        minute: 'numeric', timeZone: 'UTC'}) %>
+        [skip ci]\n\n${nextRelease.notes}
+  - "@semantic-release/github"
+
+dryRun: true

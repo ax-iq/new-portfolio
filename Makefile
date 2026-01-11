@@ -11,8 +11,13 @@ install-frontend-dependences:
 compose-dev:
 	docker compose -f compose.dev.yaml up --build --remove-orphans
 
+# Usage example:
+# make deploy OPTION=--build
+# OR
+# make deploy
+deploy: OPTION ?= 
 deploy:
-	docker compose -f compose.prod.yaml up -d --remove-orphans
+	docker compose -f compose.prod.yaml up $(OPTION) -d --remove-orphans
 
 deploy-frontend:
 	docker compose -f compose.prod.yaml up -d frontend --remove-orphans

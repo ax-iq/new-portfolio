@@ -3,8 +3,6 @@ services:
     container_name: traefik
     hostname: traefik
     image: traefik:v3.6.5
-    profiles:
-      - runtime
     command: >
       --accesslog=true
       --accesslog.format=json
@@ -169,8 +167,6 @@ services:
     container_name: vector
     hostname: vector
     image: timberio/vector:0.52.0-debian
-    profiles:
-      - runtime
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./infra/monitoring/vector/config:/etc/vector:ro
@@ -198,8 +194,6 @@ services:
     container_name: otel-collector-contrib
     hostname: otel-collector
     image: otel/opentelemetry-collector-contrib:0.142.0
-    profiles:
-      - runtime
     user: "0"
     restart: unless-stopped
     command: --config=/etc/otelcol-contrib/config.yaml
@@ -220,8 +214,6 @@ services:
 
   init:
     image: busybox
-    profiles:
-      - runtime
     user: root
     volumes:
       - loki_storage:/tmp/loki
@@ -231,8 +223,6 @@ services:
     container_name: loki
     hostname: loki
     image: grafana/loki:3.6.3
-    profiles:
-      - runtime
     restart: unless-stopped
     depends_on:
       - init
@@ -255,8 +245,6 @@ services:
     container_name: prometheus
     hostname: prometheus
     image: prom/prometheus:v3.8.1
-    profiles:
-      - runtime
     volumes:
       - ./infra/monitoring/prometheus/config/prometheus-config.yaml:/etc/prometheus/prometheus-config.yaml:ro
       - prometheus_storage:/prometheus:rw
@@ -281,8 +269,6 @@ services:
     container_name: tempo
     hostname: tempo
     image: grafana/tempo:2.9.0
-    profiles:
-      - runtime
     restart: unless-stopped
     command: -config.file=/etc/tempo/config.yaml
     volumes:
@@ -303,8 +289,6 @@ services:
     container_name: grafana
     hostname: grafana
     image: grafana/grafana:12.3.1
-    profiles:
-      - runtime
     restart: unless-stopped
     environment:
       - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
