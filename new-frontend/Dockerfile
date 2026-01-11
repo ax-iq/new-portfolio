@@ -13,7 +13,7 @@ COPY package.json pnpm-lock.yaml ./
 FROM base AS build-deps
 ARG PNPM_VERSION=10.3.0
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
-RUN pnpm install
+RUN pnpm install --dangerously-allow-all-builds
 
 FROM build-deps AS build
 RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate
