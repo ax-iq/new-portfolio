@@ -40,6 +40,36 @@ jobs:
     needs: release
     outputs:
       system_version: ${{ steps.meta.outputs.tags_new_release_version }}
+    env:
+      CF_DNS_API_TOKEN: ${{ secrets.CF_DNS_API_TOKEN }}
+      ADMIN_AUTH_CREDENTIALS: ${{ secrets.ADMIN_AUTH_CREDENTIALS }}
+      DNS_EMAIL: ${{ vars.DNS_EMAIL }}
+      CERTIFICATE_RESOLVER_NAME: ${{ vars.CERTIFICATE_RESOLVER_NAME }}
+      CA_SERVER: ${{ vars.CA_SERVER }}
+      FRONTEND_NODE_VERSION: ${{ vars.FRONTEND_NODE_VERSION }}
+      FRONTEND_PNPM_VERSION: ${{ vars.FRONTEND_PNPM_VERSION }}
+      SITE_NAME: ${{ vars.SITE_NAME }}
+      REPO_NAMESPACE: ${{ vars.REPO_NAMESPACE }}
+      SYSTEM_VERSION: dynamic
+      API_URL: ${{ vars.API_URL }}
+      BACKEND_BASE_URL: ${{ vars.BACKEND_BASE_URL }}
+      PRIMARY_DOMAIN: ${{ vars.PRIMARY_DOMAIN }}
+      BACKEND_NODE_VERSION: ${{ vars.BACKEND_NODE_VERSION }}
+      BACKEND_PNPM_VERSION: ${{ vars.BACKEND_PNPM_VERSION }}
+      DATABASE_CLIENT: ${{ vars.DATABASE_CLIENT }}
+      DATABASE_HOST: ${{ vars.DATABASE_HOST }}
+      DATABASE_NAME: ${{ vars.DATABASE_NAME }}
+      DATABASE_USERNAME: ${{ vars.DATABASE_USERNAME }}
+      DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+      APP_KEYS: ${{ secrets.APP_KEYS }}
+      API_TOKEN_SALT: ${{ secrets.API_TOKEN_SALT }}
+      ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+      TRANSFER_TOKEN_SALT: ${{ secrets.TRANSFER_TOKEN_SALT }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      NODE_ENV: ${{ vars.NODE_ENV }}
+      STRAPI_TELEMETRY_DISABLED: true
+      DATABASE_FILENAME: ${{ vars.DATABASE_FILENAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
