@@ -39,5 +39,5 @@ runs:
       shell: bash
 
     - name: Test SSH Connection
-      run: ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${SSH_USER}@${vars.SSH_HOST} "echo Connected!"
+      run: ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${SSH_USER}@${SSH_HOST} "echo Connected!"
       shell: bash
