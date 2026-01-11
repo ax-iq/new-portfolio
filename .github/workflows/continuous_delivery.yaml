@@ -135,7 +135,7 @@ jobs:
           push: true
   
   deploy:
-    name: Deploy to Server
+    name: Deploy To Server
     runs-on: ubuntu-latest
     needs: build_and_push_to_registry
     steps:
@@ -149,7 +149,7 @@ jobs:
           ssh_host: ${{ vars.SSH_HOST }}
           ssh_user: ${{ vars.USER }}
 
-      - name: Deploy via Ansible
+      - name: Deploy Via Ansible
         run: |
           ansible-playbook ${{ github.workspace }}/infra/automation/ansible/deploy-playbook.yaml \
           -i ${{ github.workspace }}/infra/automation/ansible/inventory.yaml \

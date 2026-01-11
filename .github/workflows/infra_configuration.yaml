@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Ansible
-        uses: ./.github/actions/setup_ansible
+        uses: ./.github/actions/setup-ansible
         with:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_host: ${{ vars.SSH_HOST }}
