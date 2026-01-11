@@ -14,7 +14,7 @@ plugins:
     - assets: 
       - "package.json"
       - "CHANGELOG.md"
-    - message: >-
+      message: >-
         chore(release): 
         Release <%= nextRelease.version %> - 
         <%= new Date().toLocaleDateString('en-US', 
