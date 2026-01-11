@@ -111,19 +111,19 @@ jobs:
           DATABASE_FILENAME: ${{ vars.DATABASE_FILENAME }}
         with:
           source: .
-          files: compose.prod.yaml
-          targets: backend,frontend
+          targets: frontend,backend
+          files: |
+            compose.prod.yaml
+            cwd://${{ steps.meta-frontend.outputs.bake-file-tags }}
+            cwd://${{ steps.meta-frontend.outputs.bake-file-labels }}
+            cwd://${{ steps.meta-frontend.outputs.bake-file-annotations }}
+            cwd://${{ steps.meta-backend.outputs.bake-file-tags }}
+            cwd://${{ steps.meta-backend.outputs.bake-file-labels }}
+            cwd://${{ steps.meta-backend.outputs.bake-file-annotations }}
           sbom: true
           provenance: true
           pull: false
           push: true
-          set: |
-            frontend.tags=${{ steps.meta-frontend.outputs.tags }}
-            frontend.annotations=${{ steps.meta-frontend.outputs.annotations }}
-            frontend.labels=${{ steps.meta-frontend.outputs.labels }}
-            backend.tags=${{ steps.meta-backend.outputs.tags }}
-            backend.annotations=${{ steps.meta-backend.outputs.annotations }}
-            backend.labels=${{ steps.meta-backend.outputs.labels }}
   
   deploy:
     name: Deploy to Server
