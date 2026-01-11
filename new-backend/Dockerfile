@@ -19,7 +19,7 @@ COPY package.json pnpm-lock.yaml ./
 
 RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev git > /dev/null 2>&1
 RUN pnpm install -g node-gyp \
-    && pnpm install
+    && pnpm install --dangerously-allow-all-builds
 ENV PATH=/opt/node_modules/.bin:$PATH
 
 WORKDIR /opt/strapi-app
