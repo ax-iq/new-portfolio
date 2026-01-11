@@ -1,4 +1,4 @@
-name: Create GCP Bucket for Terraform backend
+name: Create Terraform Backend
 
 on:
   workflow_dispatch:
