@@ -48,7 +48,6 @@ jobs:
           terraform validate
 
       - name: Create Bucket
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
         run: |
           terraform apply \
           -auto-approve \
