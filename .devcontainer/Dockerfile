@@ -51,6 +51,7 @@ RUN . "$NVM_DIR/nvm.sh" \
 
 # Install Ansible
 RUN python3 -m pip install ansible
+RUN python3 -m pip install ansible-lint
 
 # Install Terraform
 RUN wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
