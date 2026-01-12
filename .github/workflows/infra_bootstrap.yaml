@@ -39,10 +39,10 @@ jobs:
           # service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Init Terraform Directory / Download Providers
-        run: terraform -chdir=${{ github.workspace }}/infra/automation/terraform/01_infra init
+        run: terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap init
 
       - name: Format & Validate Terraform files
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
         run: | 
           terraform fmt -check
           terraform validate
