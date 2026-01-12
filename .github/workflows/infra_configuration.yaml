@@ -21,5 +21,5 @@ jobs:
       - name: Install Docker
         run: |
           ansible-playbook ${{ github.workspace }}/infra/automation/ansible/playbook_install_docker.yaml \
-          -i ${{ github.workspace }}/infra/automation/ansible/inventory.yaml \
+          -i ${{ github.workspace }}/infra/automation/ansible/inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }}

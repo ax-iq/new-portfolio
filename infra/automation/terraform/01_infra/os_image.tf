@@ -12,7 +12,7 @@ resource "google_compute_disk" "persistent" {
 }
 
 resource "google_compute_image" "ubuntu_with_disk" {
-  name = "ubuntu-with-disk-image"
-  source_disk = google_compute_disk.persistent.id
+  name              = "ubuntu-with-disk-image"
+  source_disk       = google_compute_disk.persistent.id
   storage_locations = [var.region]
 }

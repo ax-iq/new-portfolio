@@ -58,3 +58,33 @@ jobs:
         run: make ci-check-types-${{ matrix.app.name }}        
       - name: Test
         run: make ci-test-${{ matrix.app.name }}
+
+  check_configs:
+    name: "Check Configurations"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install ansible And ansible-lint
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install ansible==13.2.0
+          python3 -m pip install ansible-lint==26.1.0
+        shell: bash
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.1.7"
+
+      - name: Lint Terraform
+        run: make ci-lint-terraform
+
+      - name: Lint Ansible Playbooks and Inventories
+        run: make ci-lint-ansible

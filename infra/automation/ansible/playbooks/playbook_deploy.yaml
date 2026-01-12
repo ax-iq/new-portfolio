@@ -1,3 +1,4 @@
+---
 - name: Deploy
   hosts: servers
   vars:
@@ -13,32 +14,41 @@
       ansible.builtin.copy:
         src: "{{ play_cwd }}/compose.prod.yaml"
         dest: /portfolio-system/compose.prod.yaml
-        # owner: "{{ ansible_facts['user_id'] }}"
-        # group: "{{ ansible_facts['user_id'] }}"
-        # mode: '0644'
+        owner: "{{ ansible_facts['user_id'] }}"
+        group: "{{ ansible_facts['user_id'] }}"
+        mode: '0644'
 
     - name: Copy monitoring directory to server
       ansible.builtin.copy:
         src: "{{ play_cwd }}/infra/monitoring"
         dest: /portfolio-system/infra/monitoring
+        owner: "{{ ansible_facts['user_id'] }}"
+        group: "{{ ansible_facts['user_id'] }}"
+        mode: '0644'
 
     - name: Copy reverse-proxy directory to server
       ansible.builtin.copy:
         src: "{{ play_cwd }}/infra/reverse-proxy"
         dest: /portfolio-system/infra/reverse-proxy
+        owner: "{{ ansible_facts['user_id'] }}"
+        group: "{{ ansible_facts['user_id'] }}"
+        mode: '0644'
 
     - name: Create .env file
       ansible.builtin.template:
         src: "{{ play_cwd }}/.env.runtime.j2"
         dest: /portfolio-system/.env.production
+        owner: "{{ ansible_facts['user_id'] }}"
+        group: "{{ ansible_facts['user_id'] }}"
+        mode: '0644'
 
     - name: Start Docker Compose Services
       community.docker.docker_compose_v2:
         api_version: auto
         project_src: /portfolio-system
-        files: 
+        files:
           - compose.prod.yaml
-        env_files: 
+        env_files:
           - .env.production
         state: present
         build: never
