@@ -47,11 +47,14 @@ jobs:
         run: | 
           terraform fmt -check
           terraform validate
+      
+      - name: Debug Paths
+        run: |
+          pwd && ls -R;
 
       - name: Terraform Plan
         working-directory: infra/automation/terraform/00_bootstrap
         run: |
-          pwd && ls -R;
           terraform plan \
           -var="ssh_user=${{ vars.SSH_USER }}" \
           -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
