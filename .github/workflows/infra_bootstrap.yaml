@@ -47,10 +47,6 @@ jobs:
         run: | 
           terraform fmt -check
           terraform validate
-      
-      - name: Debug Paths
-        run: |
-          pwd && ls -R;
 
       - name: Terraform Plan
         working-directory: infra/automation/terraform/00_bootstrap
@@ -61,7 +57,7 @@ jobs:
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
           -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars          
+          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars          
 
       - name: Create Bucket
         working-directory: infra/automation/terraform/00_bootstrap
@@ -73,4 +69,4 @@ jobs:
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
           -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars
+          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars
