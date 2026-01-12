@@ -58,3 +58,27 @@ jobs:
         run: make ci-check-types-${{ matrix.app.name }}        
       - name: Test
         run: make ci-test-${{ matrix.app.name }}
+
+  check_configs:
+    name: "Check Configurations"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.1.7"
+
+      - name: Lint Terraform
+        run: make ci-lint-terraform
+
+      - name: Lint Ansible Playbooks
+        uses: ansible/ansible-lint@main
+        with:
+          args: "infra/automation/ansible/playbooks"
+
+      - name: Lint Ansible Inventories
+        run: |
+          make lint-inventory-ansible
