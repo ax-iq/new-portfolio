@@ -49,7 +49,7 @@ jobs:
           terraform validate
 
       - name: Terraform Plan
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
+        working-directory: infra/automation/terraform/00_bootstrap
         run: |
           pwd && ls -R;
           terraform plan \
@@ -61,7 +61,7 @@ jobs:
           -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars          
 
       - name: Create Bucket
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
+        working-directory: infra/automation/terraform/00_bootstrap
         run: |
           terraform apply \
           -auto-approve \
