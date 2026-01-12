@@ -4,8 +4,8 @@ resource "google_service_account" "vm_sa" {
 }
 
 resource "google_project_iam_member" "storage_role" {
-  project = var.project
-  role    = "roles/storage.objectAdmin"
-  member  = "serviceAccount:${google_service_account.vm_sa.email}"
+  project    = var.project
+  role       = "roles/storage.objectAdmin"
+  member     = "serviceAccount:${google_service_account.vm_sa.email}"
   depends_on = [google_service_account.vm_sa]
 }

@@ -9,8 +9,8 @@ resource "google_compute_firewall" "default" {
     protocol = "tcp"
     ports    = ["80"]
   }
-  target_tags = ["http"]
-  source_ranges = [ "0.0.0.0/0" ]
+  target_tags   = ["http"]
+  source_ranges = ["0.0.0.0/0"]
 }
 
 resource "google_compute_firewall" "https" {
@@ -31,6 +31,6 @@ resource "google_compute_firewall" "ssh" {
     protocol = "tcp"
     ports    = ["22"]
   }
-  target_tags = ["ssh"]
+  target_tags   = ["ssh"]
   source_ranges = ["0.0.0.0/0"]
 }
