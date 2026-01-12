@@ -1,7 +1,17 @@
+---
 name: Create Terraform Backend
 
 on:
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (prod/dev)"
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - dev
 
 jobs:
   create-bucket:
