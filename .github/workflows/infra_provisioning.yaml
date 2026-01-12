@@ -55,7 +55,14 @@ jobs:
 
       - name: Terraform Plan
         working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
-        run: terraform plan
+        run: |
+          terraform plan \
+          -var="ssh_user=${{ vars.SSH_USER }}" \
+          -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
+          -var="region=${{ vars.BUCKET_LOCATION }}" \
+          -var="project=${{ vars.GCP_PROJECT_ID }}" \
+          -var="bucket_name=${{ vars.BUCKET_NAME }}" \
+          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars          
 
       - name: Provision Server
         working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
@@ -67,4 +74,4 @@ jobs:
           -var="region=${{ vars.BUCKET_LOCATION }}" \
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
-          -var-file=${{ github.workspace }}/infra/automation/terraform/env/${{ github.event.inputs.environment }}/terraform.tfvars
+          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars
