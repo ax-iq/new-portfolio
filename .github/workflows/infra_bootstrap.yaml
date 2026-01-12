@@ -39,13 +39,18 @@ jobs:
           # service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Init Terraform Directory / Download Providers
-        run: terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap init
+        run: |
+          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap init
 
-      - name: Format & Validate Terraform files
+      - name: Check Format & Validate Terraform files
         working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
         run: | 
           terraform fmt -check
           terraform validate
+
+      - name: Terraform Plan
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
+        run: terraform plan
 
       - name: Create Bucket
         working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
@@ -57,4 +62,5 @@ jobs:
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
           -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var-file=${{ github.workspace }}/infra/automation/terraform/env/${{ github.event.inputs.environment }}/terraform.tfvars      
+          # -var-file=${{ github.workspace }}/infra/automation/terraform/env/${{ github.event.inputs.environment }}/terraform.tfvars
+          -var-file=../${{ github.event.inputs.environment }}/terraform.tfvars
