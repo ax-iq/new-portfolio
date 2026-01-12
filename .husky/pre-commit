@@ -1,11 +1,10 @@
 #!/bin/bash
-# Precommit for the Frontend App
-# cd new-frontend
-# make pre-commit
+# Pre-commit for the Frontend App
 make --directory=new-frontend pre-commit
 
 
-# pnpm test:ci
-# cd ../new-backend
-# make pre-commit
+# Pre-commit for Backend App
 make --directory=new-backend pre-commit
+
+# General pre-commit
+make pre-commit
