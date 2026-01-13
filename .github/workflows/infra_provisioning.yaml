@@ -41,8 +41,8 @@ jobs:
         run: gcloud config set project ${{ vars.GCP_PROJECT_ID }}
 
       # Terraform workspaces for dev/prod envinronments
-      - name: Select Workspace
-        run: terraform workspace select -or-create ${{ github.event.inputs.environment }}
+      # - name: Select Workspace
+      #   run: terraform workspace select -or-create ${{ github.event.inputs.environment }}
 
       - name: Init Terraform Directory / Download Providers
         run: | 
