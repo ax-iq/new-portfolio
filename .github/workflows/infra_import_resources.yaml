@@ -61,8 +61,7 @@ jobs:
         env:
           BUCKET_ID: ${{ vars.BUCKET_NAME }}
         run: |
-          terraform import google_storage_bucket.tf_backend ${BUCKET_ID} \
-            -input=false
+          terraform import -input=false google_storage_bucket.tf_backend ${BUCKET_ID}
 
       - name: Init Terraform Directory / Download Providers [infra]
         run: |
