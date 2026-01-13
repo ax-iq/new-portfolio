@@ -6,7 +6,7 @@ resource "google_compute_instance" "vm_instance" {
   tags = ["ssh", "http", "https"]
 
   metadata = {
-    "user_data" = templatefile("${path.module}/templates/user-data.yaml.tftpl", {
+    "user_data" = templatefile("templates/user-data.yaml.tftpl", {
       ssh_user       = var.ssh_user,
       ssh_public_key = var.ssh_public_key
     })
