@@ -51,23 +51,18 @@ jobs:
       - name: Terraform Plan
         working-directory: infra/automation/terraform/00_bootstrap
         run: |
-          pwd && ls -R;
           terraform plan \
-          -var="ssh_user=${{ vars.SSH_USER }}" \
-          -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
           -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars          
+          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars          
 
       - name: Create Bucket
         working-directory: infra/automation/terraform/00_bootstrap
         run: |
           terraform apply \
           -auto-approve \
-          -var="ssh_user=${{ vars.SSH_USER }}" \
-          -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
           -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars
+          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars

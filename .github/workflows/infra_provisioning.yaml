@@ -62,7 +62,7 @@ jobs:
           -var="region=${{ vars.BUCKET_LOCATION }}" \
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars          
+          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars          
 
       - name: Provision Server
         working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
@@ -74,4 +74,4 @@ jobs:
           -var="region=${{ vars.BUCKET_LOCATION }}" \
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
           -var="bucket_name=${{ vars.BUCKET_NAME }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/terraform.tfvars
+          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars
