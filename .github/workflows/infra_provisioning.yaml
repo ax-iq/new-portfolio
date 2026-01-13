@@ -73,5 +73,5 @@ jobs:
           -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
           -var="region=${{ vars.BUCKET_LOCATION }}" \
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
-          -var="bucket_name=${{ vars.BUCKET_NAME }}" \
+          -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
           -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars
