@@ -59,7 +59,11 @@ jobs:
       - name: Import Existing Terraform Backend Bucket
         working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
         env:
+          TF_LOG: DEBUG
           BUCKET_ID: ${{ vars.BUCKET_NAME }}
+          TF_VAR_project: ${{ vars.PROJECT }}
+          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
+          TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
         run: |
           terraform import -input=false google_storage_bucket.tf_backend ${BUCKET_ID}
 
@@ -78,9 +82,13 @@ jobs:
       - name: Import Existing Infrastructure
         working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         env:
-          BUCKET_ID: ${{ vars.BUCKET_NAME }}
+          TF_LOG: DEBUG
+          TF_VAR_ssh_user: ${{ vars.SSH_USER }}
+          TF_VAR_ssh_public_key: ${{ vars.SSH_PUBLIC_KEY }}
+          TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
+          TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
         run: |
           terraform import -input=false google_compute_disk.persistent vm-disk-prod-97532680
           terraform import -input=false google_compute_network.vpc_network vpc-network-prod-97532680
           terraform import -input=false google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access
-
