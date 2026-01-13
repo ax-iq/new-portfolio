@@ -34,8 +34,6 @@ jobs:
         with:
           project_id: ${{ vars.GCP_PROJECT_ID }}
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          # Using Direct Workload Identity Federation used instead
-          # service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
 
       - name: Select Project
         run: gcloud config set project ${{ vars.GCP_PROJECT_ID }}

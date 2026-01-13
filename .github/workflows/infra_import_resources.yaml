@@ -1,5 +1,5 @@
 ---
-name: Bootstrap Terraform For GCP
+name: Import Existing Infrastructure
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
           - dev
 
 jobs:
-  bootstrap-terraform:
+  create-bucket:
     runs-on: ubuntu-latest
 
     permissions:
@@ -38,14 +38,16 @@ jobs:
 
       - name: Select Project
         run: gcloud config set project ${{ vars.GCP_PROJECT_ID }}
-        
+
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
         run: terraform workspace select -or-create ${{ github.event.inputs.environment }}
 
       - name: Init Terraform Directory / Download Providers
         run: |
-          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap init
+          terraform \
+          -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap \
+          init
 
       - name: Check Format & Validate Terraform files
         working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
@@ -53,21 +55,24 @@ jobs:
           terraform fmt -check
           terraform validate
 
-      - name: Terraform Plan
-        working-directory: infra/automation/terraform/00_bootstrap
+      - name: Import Existing Terraform Backend Bucket
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
+        env:
+          BUCKET_ID: ${{ vars.BUCKET_NAME }}
         run: |
-          terraform plan \
-          -var="project=${{ vars.GCP_PROJECT_ID }}" \
-          -var="bucket_name=${{ vars.BUCKET_NAME }}" \
-          -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars          
+          terraform import google_storage_bucket.tf_backend ${BUCKET_ID} \
+            -input=false
 
-      - name: Terraform Apply
-        working-directory: infra/automation/terraform/00_bootstrap
+      - name: Import Existing Infrastructure
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
+        env:
+          BUCKET_ID: ${{ vars.BUCKET_NAME }}
         run: |
-          terraform apply \
-          -auto-approve \
-          -var="project=${{ vars.GCP_PROJECT_ID }}" \
-          -var="bucket_name=${{ vars.BUCKET_NAME }}" \
-          -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars
+          terraform import google_storage_bucket.tf_backend ${BUCKET_ID} \
+            -input=false
+          terraform import google_compute_disk.persistent vm-disk-prod-97532680 \
+            -input=false
+          terraform import google_compute_network.vpc_network vpc-network-prod-97532680 \
+            -input=false
+          terraform import google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access \
+            -input=false
