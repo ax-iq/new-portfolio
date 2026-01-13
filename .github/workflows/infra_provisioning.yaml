@@ -55,20 +55,22 @@ jobs:
           terraform fmt -check
           terraform validate
 
-      - name: Terraform Plan
-        env: 
-          TF_LOG: DEBUG
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
-        run: |
-          terraform plan \
-          -var="ssh_user=${{ vars.SSH_USER }}" \
-          -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
-          -var="region=${{ vars.BUCKET_LOCATION }}" \
-          -var="project=${{ vars.GCP_PROJECT_ID }}" \
-          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars \
-          -input=false         
+      # - name: Terraform Plan
+      #   env: 
+      #     TF_LOG: DEBUG
+      #   working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
+      #   run: |
+      #     terraform plan \
+      #     -var="ssh_user=${{ vars.SSH_USER }}" \
+      #     -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
+      #     -var="region=${{ vars.BUCKET_LOCATION }}" \
+      #     -var="project=${{ vars.GCP_PROJECT_ID }}" \
+      #     -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars \
+      #     -input=false         
 
       - name: Provision Server
+        env: 
+          TF_LOG: DEBUG
         working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         run: |
           terraform apply \
