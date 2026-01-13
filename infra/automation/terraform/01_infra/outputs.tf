@@ -3,5 +3,5 @@ output "public_ip" {
 }
 
 output "sa_email" {
-  value = google_service_account.sa.email
+  value = google_service_account.vm_sa.email
 }

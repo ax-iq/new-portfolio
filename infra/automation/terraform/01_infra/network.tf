@@ -1,5 +1,5 @@
 resource "google_compute_network" "vpc_network" {
-  name = "vpc-network"
+  name = "vpc-network-prod-97532680"
 }
 
 resource "google_compute_firewall" "default" {

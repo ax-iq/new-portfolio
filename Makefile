@@ -11,7 +11,7 @@ ci-lint-terraform: lint-terraform
 ci-lint-ansible: lint-ansible
 ci-lint-inventory-ansible: lint-inventory-ansible
 
-lint-terraform: lint-format-terraform
+lint-terraform: lint-format-terraform lint-validate-terraform
 lint-ansible: lint-playbook-ansible lint-inventory-ansible
 
 pre-commit: format-terraform lint-terraform lint-ansible
@@ -80,6 +80,10 @@ install-frontend-dependences:
 # L ----------------------
 lint-format-terraform:
 	terraform fmt -check -recursive infra/automation/terraform
+
+lint-validate-terraform:
+	terraform validate infra/automation/terraform
+
 
 lint-playbook-ansible:
 # 	ansible-playbook --syntax-check infra/automation/ansible/playbooks/*.{yaml,yml}
