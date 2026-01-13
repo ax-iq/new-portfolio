@@ -1,5 +1,5 @@
 resource "google_compute_instance" "vm_instance" {
-  name         = "ubuntu-vm-instance"
+  name         = "ubuntu-vm-prod-97532680"
   machine_type = "e2-micro"
   zone         = var.zone
 

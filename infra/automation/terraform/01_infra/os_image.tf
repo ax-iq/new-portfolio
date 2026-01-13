@@ -1,6 +1,6 @@
 data "google_compute_image" "ubuntu" {
   family  = "ubuntu-2404-lts-amd64"
-  project = var.project
+  project = "ubuntu-os-cloud"
 }
 
 resource "google_compute_disk" "persistent" {
@@ -12,7 +12,7 @@ resource "google_compute_disk" "persistent" {
 }
 
 resource "google_compute_image" "ubuntu_with_disk" {
-  name              = "ubuntu-with-disk-image"
+  name              = "ubuntu-with-disk-image-prod-97532680"
   source_disk       = google_compute_disk.persistent.id
   storage_locations = [var.region]
 }
