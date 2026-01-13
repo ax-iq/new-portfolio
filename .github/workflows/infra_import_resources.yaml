@@ -81,9 +81,7 @@ jobs:
         env:
           BUCKET_ID: ${{ vars.BUCKET_NAME }}
         run: |
-          terraform import google_compute_disk.persistent vm-disk-prod-97532680 \
-            -input=false
-          terraform import google_compute_network.vpc_network vpc-network-prod-97532680 \
-            -input=false
-          terraform import google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access \
-            -input=false
+          terraform import -input=false google_compute_disk.persistent vm-disk-prod-97532680
+          terraform import -input=false google_compute_network.vpc_network vpc-network-prod-97532680
+          terraform import -input=false google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access
+
