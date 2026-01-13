@@ -38,14 +38,14 @@ jobs:
 
       - name: Select Project
         run: gcloud config set project ${{ vars.GCP_PROJECT_ID }}
-        
-      # Terraform workspaces for dev/prod envinronments
-      - name: Select Workspace
-        run: terraform workspace select -or-create ${{ github.event.inputs.environment }}
 
       - name: Init Terraform Directory / Download Providers
         run: |
-          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap init
+          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap -input=false init
+
+      # Terraform workspaces for dev/prod envinronments
+      - name: Select Workspace
+        run: terraform workspace select -or-create ${{ github.event.inputs.environment }}
 
       - name: Check Format & Validate Terraform files
         working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
