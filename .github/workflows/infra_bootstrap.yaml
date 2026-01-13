@@ -41,7 +41,7 @@ jobs:
 
       - name: Init Terraform Directory / Download Providers
         run: |
-          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap -input=false init
+          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap init -input=false
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
