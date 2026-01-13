@@ -59,11 +59,11 @@ jobs:
       - name: Terraform Plan
         env: 
           TF_LOG: DEBUG
-          TF_SSH_USER: ${{ vars.SSH_USER }}
-          TF_SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
-          TF_REGION: ${{ vars.BUCKET_LOCATION }}
-          TF_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-          TF_BUCKET_NAME: ${{ vars.BUCKET_NAME }}
+          TF_VAR_ssh_user: ${{ vars.SSH_USER }}
+          TF_VAR_ssh_public_key: ${{ vars.SSH_PUBLIC_KEY }}
+          TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
+          TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_backet_name: ${{ vars.BUCKET_NAME }}
         working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         run: |
           terraform plan -input=false
@@ -80,11 +80,11 @@ jobs:
       - name: Provision Server
         env: 
           TF_LOG: DEBUG
-          TF_SSH_USER: ${{ vars.SSH_USER }}
-          TF_SSH_PUBLIC_KEY: ${{ vars.SSH_PUBLIC_KEY }}
-          TF_REGION: ${{ vars.BUCKET_LOCATION }}
-          TF_GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-          TF_BUCKET_NAME: ${{ vars.BUCKET_NAME }}
+          TF_VAR_ssh_user: ${{ vars.SSH_USER }}
+          TF_VAR_ssh_public_key: ${{ vars.SSH_PUBLIC_KEY }}
+          TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
+          TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
+          TF_VAR_backet_name: ${{ vars.BUCKET_NAME }}
         working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         run: |
           terraform apply -auto-approve -input=false \
