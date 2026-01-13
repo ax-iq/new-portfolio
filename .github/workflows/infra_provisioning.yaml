@@ -42,7 +42,7 @@ jobs:
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
-        run: terraform workspace select ${{ github.event.inputs.environment }} || terraform workspace new ${{ github.event.inputs.environment }}
+        run: terraform workspace -or-create select ${{ github.event.inputs.environment }}
 
       - name: Init Terraform Directory / Download Providers
         run: | 
