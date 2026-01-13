@@ -43,7 +43,7 @@ jobs:
       - name: Init Terraform Directory / Download Providers [bootstrap]
         run: |
           terraform \
-          -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap \
+          -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap_copy_plus_backend \
           init -input=false
 
       # Terraform workspaces for dev/prod envinronments
@@ -51,13 +51,13 @@ jobs:
         run: terraform workspace select -or-create ${{ github.event.inputs.environment }}
 
       - name: Check Format & Validate Terraform files [bootstrap]
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap_copy_plus_backend
         run: | 
           terraform fmt -check
           terraform validate
 
       - name: Import Existing Terraform Backend Bucket
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
+        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap_copy_plus_backend
         env:
           TF_LOG: DEBUG
           TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
