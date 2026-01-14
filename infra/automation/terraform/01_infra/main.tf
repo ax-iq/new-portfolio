@@ -17,7 +17,7 @@ resource "google_compute_instance" "vm_instance" {
       image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
       size  = var.disk_size
       type  = "pd-standard"
-      
+
       labels = {
         my_label = "ubuntu-2404-lts-amd64"
       }
