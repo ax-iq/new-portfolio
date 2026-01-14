@@ -14,5 +14,5 @@ resource "google_compute_disk" "persistent" {
 resource "google_compute_image" "ubuntu_with_disk" {
   name              = "ubuntu-with-disk-image-prod-97532680"
   source_disk       = google_compute_disk.persistent.id
-  storage_locations = [var.zone]
+  storage_locations = [var.region]
 }
