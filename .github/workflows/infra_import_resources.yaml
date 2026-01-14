@@ -17,11 +17,12 @@ jobs:
   import-infra:
     name: Import Current GCP Infrastructure
     runs-on: ubuntu-latest
-
     permissions:
       contents: 'read'
       id-token: 'write'
-
+    defaults:
+      run:
+        working-directory: ./infra/automation/terraform/01_infra
     steps:
       - name: Checkout Code Source
         uses: actions/checkout@v5
@@ -40,41 +41,9 @@ jobs:
       - name: Select Project
         run: gcloud config set project ${{ vars.GCP_PROJECT_ID }}
 
-      - name: Init Terraform Directory / Download Providers [bootstrap]
-        run: |
-          terraform \
-          -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap_copy_plus_backend \
-          init \
-          -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
-          -input=false
-
-
-      # Terraform workspaces for dev/prod envinronments
-      - name: Select Workspace
-        run: terraform workspace select -or-create=true ${{ github.event.inputs.environment }}
-
-      - name: Check Format & Validate Terraform files [bootstrap]
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap_copy_plus_backend
-        run: | 
-          terraform fmt -check
-          terraform validate
-
-      - name: Import Existing Terraform Backend Bucket
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap_copy_plus_backend
-        env:
-          TF_LOG: DEBUG
-          TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
-          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
-          TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
-          BUCKET_ID: ${{ vars.BUCKET_NAME }}
-        run: |
-          terraform import -input=false google_storage_bucket.tf_backend ${BUCKET_ID}
-
       - name: Init Terraform Directory / Download Providers [infra]
         run: |
-          terraform \
-          -chdir=${{ github.workspace }}/infra/automation/terraform/01_infra \
-          init \
+          terraform init \
           -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
           -input=false
 
@@ -83,13 +52,11 @@ jobs:
         run: terraform workspace select -or-create=true ${{ github.event.inputs.environment }}
 
       - name: Check Format & Validate Terraform files [infra]
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         run: | 
           terraform fmt -check
           terraform validate
 
       - name: Import Existing Infrastructure
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         env:
           TF_LOG: DEBUG
           TF_VAR_ssh_user: ${{ vars.SSH_USER }}
@@ -98,6 +65,7 @@ jobs:
           TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
         run: |
+          terraform import -input=false google_storage_bucket.tf_backend ${{ vars.BUCKET_NAME }}
           terraform import -input=false google_compute_disk.persistent vm-disk-prod-97532680
           terraform import -input=false google_compute_network.vpc_network vpc-network-prod-97532680
           terraform import -input=false google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access

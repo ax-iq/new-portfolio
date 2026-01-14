@@ -16,11 +16,12 @@ jobs:
   provision:
     name: Provision Server
     runs-on: ubuntu-latest
-
     permissions:
       contents: 'read'
       id-token: 'write'
-
+    defaults:
+      run:
+        working-directory: ./infra/automation/terraform/01_infra
     steps:
       - name: Checkout Code Source
         uses: actions/checkout@v5
@@ -41,16 +42,18 @@ jobs:
 
       - name: Init Terraform Directory / Download Providers
         run: | 
-          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/01_infra init \
+          terraform init \
           -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
           -input=false
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
-        run: terraform workspace select -or-create=true ${{ github.event.inputs.environment }}
+        run: |
+          terraform workspace select \
+          -or-create=true \
+          ${{ github.event.inputs.environment }}
 
       - name: Check Format & Validate Terraform files
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         run: | 
           terraform fmt -check
           terraform validate
@@ -63,18 +66,8 @@ jobs:
           TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
           TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         run: |
           terraform plan -input=false
-
-      #   run: |
-      #     terraform plan \
-      #     -var="ssh_user=${{ vars.SSH_USER }}" \
-      #     -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
-      #     -var="region=${{ vars.BUCKET_LOCATION }}" \
-      #     -var="project=${{ vars.GCP_PROJECT_ID }}" \
-      #     -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars \
-      #     -input=false         
 
       - name: Provision Server
         env: 
@@ -84,17 +77,6 @@ jobs:
           TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
           TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/01_infra
         run: |
           terraform apply -auto-approve -input=false \
           -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars
-
-        # run: |
-        #   terraform apply \
-        #   -auto-approve \
-        #   -var="ssh_user=${{ vars.SSH_USER }}" \
-        #   -var="ssh_public_key=${{ vars.SSH_PUBLIC_KEY }}" \
-        #   -var="region=${{ vars.BUCKET_LOCATION }}" \
-        #   -var="project=${{ vars.GCP_PROJECT_ID }}" \
-        #   -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
-        #   -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars
