@@ -45,7 +45,7 @@ jobs:
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
-        run: terraform workspace select -or-create ${{ github.event.inputs.environment }}
+        run: terraform workspace select -or-create=true ${{ github.event.inputs.environment }}
 
       - name: Check Format & Validate Terraform files
         working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
