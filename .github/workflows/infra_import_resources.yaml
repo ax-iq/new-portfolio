@@ -44,7 +44,10 @@ jobs:
         run: |
           terraform \
           -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap_copy_plus_backend \
-          init -input=false
+          init \
+          -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
+          -input=false
+
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
@@ -71,7 +74,9 @@ jobs:
         run: |
           terraform \
           -chdir=${{ github.workspace }}/infra/automation/terraform/01_infra \
-          init -input=false
+          init \
+          -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
+          -input=false
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
