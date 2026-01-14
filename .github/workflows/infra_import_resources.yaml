@@ -69,3 +69,6 @@ jobs:
           terraform import -input=false google_compute_disk.persistent vm-disk-prod-97532680
           terraform import -input=false google_compute_network.vpc_network vpc-network-prod-97532680
           terraform import -input=false google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access
+          terraform import -input=false google_compute_firewall.default projects/portfolio-prod-97532680/global/firewalls/http-access
+          terraform import -input=false google_compute_image.ubuntu_with_disk projects/portfolio-prod-97532680/global/images/ubuntu-with-disk-image-prod-97532680
+          terraform import -input=false google_compute_firewall.ssh projects/portfolio-prod-97532680/global/firewalls/ssh
