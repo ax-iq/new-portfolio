@@ -65,7 +65,7 @@ jobs:
           TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
         run: |
-          terraform import -input=false google_storage_bucket.tf_backend ${{ vars.BUCKET_NAME }}
+          # terraform import -input=false google_storage_bucket.tf_backend ${{ vars.BUCKET_NAME }}
           terraform import -input=false google_compute_disk.persistent vm-disk-prod-97532680
           terraform import -input=false google_compute_network.vpc_network vpc-network-prod-97532680
           terraform import -input=false google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access
