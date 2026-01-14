@@ -16,11 +16,12 @@ on:
 jobs:
   bootstrap-terraform:
     runs-on: ubuntu-latest
-
     permissions:
       contents: 'read'
       id-token: 'write'
-
+    defaults:
+      run:
+        working-directory: ./infra/automation/terraform/00_bootstrap
     steps:
       - name: Checkout Code Source
         uses: actions/checkout@v5
@@ -41,20 +42,18 @@ jobs:
 
       - name: Init Terraform Directory / Download Providers
         run: |
-          terraform -chdir=${{ github.workspace }}/infra/automation/terraform/00_bootstrap init -input=false
+          terraform init -input=false
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
         run: terraform workspace select -or-create=true ${{ github.event.inputs.environment }}
 
       - name: Check Format & Validate Terraform files
-        working-directory: ${{ github.workspace }}/infra/automation/terraform/00_bootstrap
         run: | 
           terraform fmt -check
           terraform validate
 
       - name: Terraform Plan
-        working-directory: infra/automation/terraform/00_bootstrap
         run: |
           terraform plan \
           -var="project=${{ vars.GCP_PROJECT_ID }}" \
@@ -63,7 +62,6 @@ jobs:
           -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars          
 
       - name: Terraform Apply
-        working-directory: infra/automation/terraform/00_bootstrap
         run: |
           terraform apply \
           -auto-approve \
