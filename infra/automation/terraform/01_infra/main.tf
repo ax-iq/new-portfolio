@@ -6,14 +6,22 @@ resource "google_compute_instance" "vm_instance" {
   tags = ["ssh", "http", "https"]
 
   metadata = {
-    "user_data" = templatefile("templates/user-data.yaml.tftpl", {
+    "user-data" = templatefile("templates/user-data.yaml.tftpl", {
       ssh_user       = var.ssh_user,
       ssh_public_key = var.ssh_public_key
     })
   }
 
   boot_disk {
-    source = google_compute_image.ubuntu_with_disk.self_link
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-2404-lts-amd64"
+      size  = var.disk_size
+      type  = "pd-standard"
+
+      labels = {
+        my_label = "ubuntu-2404-lts-amd64"
+      }
+    }
   }
 
   network_interface {

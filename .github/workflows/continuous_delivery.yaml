@@ -147,7 +147,7 @@ jobs:
         with:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_host: ${{ vars.SSH_HOST }}
-          ssh_user: ${{ vars.USER }}
+          ssh_user: ${{ vars.SSH_USER }}
 
       - name: Deploy Via Ansible
         run: |

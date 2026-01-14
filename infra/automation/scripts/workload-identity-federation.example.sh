@@ -125,6 +125,11 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --role="roles/iam.serviceAccountAdmin" \
   --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
 
+# Project Admin
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --role="roles/resourcemanager.projectIamAdmin" \
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
+
 echo "***************************************************************************"
 echo "GCP_WORKLOAD_IDENTITY_PROVIDER=${WORKLOAD_IDENTITY_PROVIDER}"
 echo "GCP_PROJECT_ID=${PROJECT_ID}"
