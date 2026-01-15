@@ -24,7 +24,7 @@ ansible-intall-docker:
 	ansible-playbook infra/automation/ansible/playbook_install_docker.yaml -i infra/automation/ansible/inventories/inventory.yaml -u root --private-key=infra/automation/ansible/.tmp/local_container_key
 
 ansible-deploy-dev:
-	ansible-playbook infra/automation/ansible/playbooks/playbook_deploy.yaml \
+	ansible-playbook infra/automation/ansible/playbook_deploy.yaml \
 		-i infra/automation/ansible/inventories/inventory.yaml \
 		-u root \
 		--private-key=infra/automation/ansible/.tmp/local_container_key \
@@ -86,8 +86,8 @@ lint-validate-terraform:
 
 
 lint-playbook-ansible:
-# 	ansible-playbook --syntax-check infra/automation/ansible/playbooks/*.{yaml,yml}
-	ansible-lint infra/automation/ansible/playbooks
+# 	ansible-playbook --syntax-check infra/automation/ansible/*.{yaml,yml}
+	ansible-lint infra/automation/ansible
 
 lint-inventory-ansible:
 	ansible-inventory --inventory infra/automation/ansible/inventories --yaml --graph all

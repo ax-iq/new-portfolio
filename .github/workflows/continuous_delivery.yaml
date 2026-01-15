@@ -151,7 +151,7 @@ jobs:
           ssh_user: ${{ vars.SSH_USER }}
 
       - name: Deploy Via Ansible
-        working-directory: ${{ github.workspace }}/infra/automation/ansible
+        working-directory: ./infra/automation/ansible
         run: |
           ansible-playbook \
           -v \
@@ -187,4 +187,4 @@ jobs:
           -e "certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}" \
           -e "ca_server=${{ vars.CA_SERVER }}" \
           -e "ansible_host=${{ vars.SSH_HOST }}" \
-          ./playbooks/playbook_deploy.yaml
+          playbook_deploy.yaml
