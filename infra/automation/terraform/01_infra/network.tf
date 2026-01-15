@@ -5,7 +5,7 @@ resource "google_compute_network" "vpc_network" {
 
 resource "google_compute_firewall" "default" {
   name    = "http-access"
-  network = google_compute_network.vpc_network.name
+  network = "default"
   allow {
     protocol = "tcp"
     ports    = ["80"]
@@ -16,7 +16,7 @@ resource "google_compute_firewall" "default" {
 
 resource "google_compute_firewall" "https" {
   name    = "https-access"
-  network = google_compute_network.vpc_network.name
+  network = "default"
   allow {
     protocol = "tcp"
     ports    = ["443"]
@@ -27,7 +27,7 @@ resource "google_compute_firewall" "https" {
 
 resource "google_compute_firewall" "ssh" {
   name    = "ssh-access"
-  network = google_compute_network.vpc_network.name
+  network = "default"
   allow {
     protocol = "tcp"
     ports    = ["22"]
