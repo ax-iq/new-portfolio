@@ -25,7 +25,7 @@ jobs:
           ssh_user: ${{ vars.SSH_USER }}
         
       - name: Deploy via Ansible
-        working-directory: ./infra/automation/ansible
+        working-directory: ${{ github.workspace }}/infra/automation/ansible
         run: |
           ansible-playbook \
           -v \
