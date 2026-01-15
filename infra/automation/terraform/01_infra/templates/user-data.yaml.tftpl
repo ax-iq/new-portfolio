@@ -16,7 +16,7 @@ users:
     shell: /bin/bash
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     ssh_authorized_keys:
-      - ssh-rsa ${ssh_public_key}
+      - ${ssh_public_key}
 
 runcmd:
   # Enable SSH Server
