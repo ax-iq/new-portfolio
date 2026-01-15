@@ -15,7 +15,7 @@ resource "google_compute_firewall" "default" {
 
 resource "google_compute_firewall" "https" {
   name    = "https-access"
-  network = "default"
+  network = google_compute_network.vpc_network.name
   allow {
     protocol = "tcp"
     ports    = ["443"]
