@@ -1,3 +1,4 @@
+---
 name: Continuous Delivery
 
 on:
@@ -154,40 +155,33 @@ jobs:
           ansible-playbook ${{ github.workspace }}/infra/automation/ansible/playbooks/playbook_deploy.yaml \
           -i ${{ github.workspace }}/infra/automation/ansible/inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }} \
-          --extra-vars \ 
-          
-          "system_version=${{ needs.build_and_push_to_registry.outputs.system_version }} \
-          
-          cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }} \
-          frontend_node_version=${{ vars.FRONTEND_NODE_VERSION }} \
-          frontend_pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }} \
-
-          backend_pnpm_version=${{ vars.BACKEND_PNPM_VERSION }} \
-          backend_node_version=${{ vars.BACKEND_NODE_VERSION }} \
-
-          api_url=${{ vars.API_URL }} \
-          backend_base_url=${{ vars.BACKEND_BASE_URL }} \
-
-          database_client=${{ vars.DATABASE_CLIENT }} \
-          database_name=${{ vars.DATABASE_NAME }} \
-          database_username=${{ vars.DATABASE_USERNAME }} \
-          database_password=${{ secrets.DATABASE_PASSWORD }} \
-          database_port=${{ vars.DATABASE_PORT }} \
-          jwt_token=${{ secrets.JWT_SECRET }} \
-          app_keys=${{ secrets.APP_KEYS }} \
-          admin_jwt_secret=${{ secrets.ADMIN_JWT_SECRET }} \
-          encryption_key=${{ secrets.ENCRYPTION_KEY }} \
-          api_token_salt=${{ secrets.API_TOKEN_SALT }} \
-          transfer_token_salt=${{ secrets.TRANSFER_TOKEN_SALT }} \
-          database_filename=${{ vars.DATABASE_FILENAME }} \
-          strapi_telemetry_disabled=${{ vars.STRAPI_TELEMETRY_DISABLED }} \
-
-          node_env=${{ vars.NODE_ENV }}
-          admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}
-          
-          pimary_domain=${{ vars.PRIMARY_DOMAIN }}
-          site_name=${{ vars.SITE_NAME }}
-          repo_namespace=${{ vars.REPO_NAMESPACE }}
-          dns_email=${{ vars.DNS_EMAIL }}
-          certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}
-          ca_server=${{ vars.CA_SERVER }}"
+          -e "system_version=${{ github.event.inputs.sytem_version }}" \  
+          -e "cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }}" \
+          -e "frontend_node_version=${{ vars.FRONTEND_NODE_VERSION }}" \
+          -e "frontend_pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }}" \
+          -e "backend_pnpm_version=${{ vars.BACKEND_PNPM_VERSION }}" \
+          -e "backend_node_version=${{ vars.BACKEND_NODE_VERSION }}" \
+          -e "api_url=${{ vars.API_URL }}" \
+          -e "backend_base_url=${{ vars.BACKEND_BASE_URL }}" \
+          -e "database_client=${{ vars.DATABASE_CLIENT }}" \
+          -e "database_name=${{ vars.DATABASE_NAME }}" \
+          -e "database_username=${{ vars.DATABASE_USERNAME }}" \
+          -e "database_password=${{ secrets.DATABASE_PASSWORD }}" \
+          -e "database_port=${{ vars.DATABASE_PORT }}" \
+          -e "jwt_token=${{ secrets.JWT_SECRET }}" \
+          -e "app_keys=${{ secrets.APP_KEYS }}" \
+          -e "admin_jwt_secret=${{ secrets.ADMIN_JWT_SECRET }}" \
+          -e "encryption_key=${{ secrets.ENCRYPTION_KEY }}" \
+          -e "api_token_salt=${{ secrets.API_TOKEN_SALT }}" \
+          -e "transfer_token_salt=${{ secrets.TRANSFER_TOKEN_SALT }}" \
+          -e "database_filename=${{ vars.DATABASE_FILENAME }}" \
+          -e "strapi_telemetry_disabled=${{ vars.STRAPI_TELEMETRY_DISABLED }}" \
+          -e "node_env=${{ vars.NODE_ENV }}" \
+          -e "admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}" \
+          -e "pimary_domain=${{ vars.PRIMARY_DOMAIN }}" \
+          -e "site_name=${{ vars.SITE_NAME }}" \
+          -e "repo_namespace=${{ vars.REPO_NAMESPACE }}" \
+          -e "dns_email=${{ vars.DNS_EMAIL }}" \
+          -e "certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}" \
+          -e "ca_server=${{ vars.CA_SERVER }}" \
+          -e "ansible_host=${{ vars.SSH_HOST }}"
