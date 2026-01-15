@@ -26,7 +26,8 @@ jobs:
         
       - name: Deploy via Ansible
         run: |
-          ansible-playbook ${{ github.workspace }}/infra/automation/ansible/playbooks/playbook_deploy.yaml \
+          ansible-playbook \
+          -v \
           -i ${{ github.workspace }}/infra/automation/ansible/inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }} \
           -e "system_version=${{ github.event.inputs.sytem_version }}" \  
@@ -58,4 +59,5 @@ jobs:
           -e "dns_email=${{ vars.DNS_EMAIL }}" \
           -e "certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}" \
           -e "ca_server=${{ vars.CA_SERVER }}" \
-          -e "ansible_host=${{ vars.SSH_HOST }}"
+          -e "ansible_host=${{ vars.SSH_HOST }}" \
+          ${{ github.workspace }}/infra/automation/ansible/playbooks/playbook_deploy.yaml
