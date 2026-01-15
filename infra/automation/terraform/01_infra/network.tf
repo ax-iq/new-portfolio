@@ -1,5 +1,6 @@
 resource "google_compute_network" "vpc_network" {
   name = "vpc-network-prod-97532680"
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_firewall" "default" {
