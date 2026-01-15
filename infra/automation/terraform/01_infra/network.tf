@@ -10,16 +10,16 @@ resource "google_compute_subnetwork" "subnet_main" {
   network       = google_compute_network.vpc_network.id
 }
 
-resource "google_compute_firewall" "http" {
-  name    = "http-access"
-  network = google_compute_network.vpc_network.name
-  allow {
-    protocol = "tcp"
-    ports    = ["80"]
-  }
-  target_tags   = ["http-server"]
-  source_ranges = ["0.0.0.0/0"]
-}
+# resource "google_compute_firewall" "http" {
+#   name    = "http-access"
+#   network = google_compute_network.vpc_network.name
+#   allow {
+#     protocol = "tcp"
+#     ports    = ["80"]
+#   }
+#   target_tags   = ["http-server"]
+#   source_ranges = ["0.0.0.0/0"]
+# }
 
 resource "google_compute_firewall" "https" {
   name    = "https-access"
