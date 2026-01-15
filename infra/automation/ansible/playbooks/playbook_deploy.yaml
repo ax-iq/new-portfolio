@@ -1,6 +1,6 @@
 ---
 - name: Deploy
-  hosts: servers
+  hosts: webservers
   vars:
     play_cwd: "{{ lookup('env','PWD') }}"
   tasks:
