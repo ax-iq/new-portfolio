@@ -151,10 +151,11 @@ jobs:
           ssh_user: ${{ vars.SSH_USER }}
 
       - name: Deploy Via Ansible
+        working-directory: infra/automation/ansible
         run: |
           ansible-playbook \
           -v \
-          -i ${{ github.workspace }}/infra/automation/ansible/inventories/inventory.yaml \
+          -i inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }} \
           -e "system_version=${{ github.event.inputs.sytem_version }}" \  
           -e "cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }}" \
@@ -186,4 +187,4 @@ jobs:
           -e "certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}" \
           -e "ca_server=${{ vars.CA_SERVER }}" \
           -e "ansible_host=${{ vars.SSH_HOST }}" \
-          ${{ github.workspace }}/infra/automation/ansible/playbooks/playbook_deploy.yaml
+          playbooks/playbook_deploy.yaml
