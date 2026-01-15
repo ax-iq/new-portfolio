@@ -1,11 +1,11 @@
 ---
-# 
+#
 # Variables for the host "portfolio_host"
-# 
+#
 # Can be overwriten with the --extra-vars
 # option in ansible-playbook command. Example:
 # ansible-playbook playbook.yaml --extra-vars "ansible_host=custom-host-name"
-# 
+#
 # This variable ansible_host is not yet used
 # in any playbook nor inventory files.
 ansible_host: ubuntu
