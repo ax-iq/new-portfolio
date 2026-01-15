@@ -3,7 +3,7 @@ resource "google_compute_instance" "vm_instance" {
   machine_type = "e2-micro"
   zone         = var.zone
 
-  tags = ["ssh", "http", "https"]
+  tags = ["allow-ssh", "http-server", "https-server"]
 
   metadata = {
     "user-data" = templatefile("templates/user-data.yaml.tftpl", {
