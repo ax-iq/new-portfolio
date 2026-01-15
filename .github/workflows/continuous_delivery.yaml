@@ -151,7 +151,7 @@ jobs:
 
       - name: Deploy Via Ansible
         run: |
-          ansible-playbook ${{ github.workspace }}/infra/automation/ansible/playbook_deploy.yaml \
+          ansible-playbook ${{ github.workspace }}/infra/automation/ansible/playbooks/playbook_deploy.yaml \
           -i ${{ github.workspace }}/infra/automation/ansible/inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }} \
           --extra-vars \ 

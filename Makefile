@@ -24,7 +24,7 @@ ansible-intall-docker:
 	ansible-playbook infra/automation/ansible/playbook_install_docker.yaml -i infra/automation/ansible/inventories/inventory.yaml -u root --private-key=infra/automation/ansible/.tmp/local_container_key
 
 ansible-deploy-dev:
-	ansible-playbook infra/automation/ansible/playbook_deploy.yaml \
+	ansible-playbook infra/automation/ansible/playbooks/playbook_deploy.yaml \
 		-i infra/automation/ansible/inventories/inventory.yaml \
 		-u root \
 		--private-key=infra/automation/ansible/.tmp/local_container_key \
