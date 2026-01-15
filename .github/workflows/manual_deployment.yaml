@@ -23,7 +23,12 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_host: ${{ vars.SSH_HOST }}
           ssh_user: ${{ vars.SSH_USER }}
-        
+
+      - name: Debugging
+        run: |
+          ls -la ${{ github.workspace }}/infra/automation/ansible/playbooks
+          ls -la ${{ github.workspace }}/infra/automation/ansible/inventories
+ 
       - name: Deploy via Ansible
         working-directory: ${{ github.workspace }}/infra/automation/ansible
         run: |
