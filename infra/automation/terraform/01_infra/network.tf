@@ -3,7 +3,14 @@ resource "google_compute_network" "vpc_network" {
   auto_create_subnetworks = false
 }
 
-resource "google_compute_firewall" "default" {
+resource "google_compute_subnetwork" "subnet_main" {
+  name          = "subnet-main"
+  ip_cidr_range = "10.10.1.0/24"
+  region        = var.region
+  network       = google_compute_network.vpc_network.id
+}
+
+resource "google_compute_firewall" "http" {
   name    = "http-access"
   network = google_compute_network.vpc_network.name
   allow {

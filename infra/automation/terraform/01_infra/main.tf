@@ -25,9 +25,9 @@ resource "google_compute_instance" "vm_instance" {
   }
 
   network_interface {
-    network = google_compute_network.vpc_network.name
-    access_config {
-    }
+    network = google_compute_network.vpc_network.id
+    subnetwork = google_compute_subnetwork.subnet_main.id
+    access_config {}
   }
 
   service_account {
