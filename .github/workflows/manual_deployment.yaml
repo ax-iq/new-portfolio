@@ -33,7 +33,6 @@ jobs:
         working-directory: ./infra/automation/ansible
         run: |
           ansible-playbook \
-          -v \
           -i inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }} \
           -e "system_version=${{ github.event.inputs.sytem_version }}" \  
