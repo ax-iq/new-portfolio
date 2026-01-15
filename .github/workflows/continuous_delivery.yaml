@@ -151,7 +151,7 @@ jobs:
           ssh_user: ${{ vars.SSH_USER }}
 
       - name: Deploy Via Ansible
-        working-directory: infra/automation/ansible
+        working-directory: ./infra/automation/ansible
         run: |
           ansible-playbook \
           -v \
