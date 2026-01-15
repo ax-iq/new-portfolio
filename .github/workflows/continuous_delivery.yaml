@@ -156,6 +156,7 @@ jobs:
           ansible-playbook \
           -i inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }} \
+          --private-key ~/.ssh/id_rsa \
           -e "system_version=${{ github.event.inputs.sytem_version }}" \
           -e "cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }}" \
           -e "frontend_node_version=${{ vars.FRONTEND_NODE_VERSION }}" \
