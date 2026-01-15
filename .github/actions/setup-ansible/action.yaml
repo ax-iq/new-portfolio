@@ -38,6 +38,6 @@ runs:
         ssh-keyscan -v -t rsa -p 22 ${SSH_HOST} >> ~/.ssh/known_hosts
       shell: bash
 
-    # - name: Test SSH Connection
-    #   run: ssh -i ~/.ssh/id_rsa ${SSH_USER}@${SSH_HOST} "echo Connected!"
-    #   shell: bash
+    - name: Test SSH Connection
+      run: ssh -i ~/.ssh/id_rsa ${SSH_USER}@${SSH_HOST} "echo Connected!"
+      shell: bash
