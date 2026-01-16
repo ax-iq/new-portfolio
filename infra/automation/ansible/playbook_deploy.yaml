@@ -24,6 +24,7 @@
         dest: ~/portfolio-system/infra/monitoring
         owner: "{{ ansible_facts['user_id'] }}"
         group: "{{ ansible_facts['user_id'] }}"
+        directory_mode: '0755'
         mode: '0644'
 
     - name: Copy reverse-proxy directory to server
@@ -32,6 +33,7 @@
         dest: ~/portfolio-system/infra/reverse-proxy
         owner: "{{ ansible_facts['user_id'] }}"
         group: "{{ ansible_facts['user_id'] }}"
+        directory_mode: '0755'
         mode: '0644'
 
     - name: Create .env file
