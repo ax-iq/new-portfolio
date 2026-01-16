@@ -2,42 +2,42 @@
 - name: Deploy
   hosts: webservers
   vars:
-    play_cwd: "{{ lookup('env','PWD') }}"
+    project_root: "{{ playbook_dir }}/../../.."
   tasks:
     - name: Ensure destination directory exists
       ansible.builtin.file:
-        path: /portfolio-system
+        path: ~/portfolio-system
         state: directory
         mode: '0755'
 
     - name: Copy docker compose file to server
       ansible.builtin.copy:
-        src: "{{ play_cwd }}/compose.prod.yaml"
-        dest: /portfolio-system/compose.prod.yaml
+        src: "{{ project_root }}/compose.prod.yaml"
+        dest: ~/portfolio-system/compose.prod.yaml
         owner: "{{ ansible_facts['user_id'] }}"
         group: "{{ ansible_facts['user_id'] }}"
         mode: '0644'
 
     - name: Copy monitoring directory to server
       ansible.builtin.copy:
-        src: "{{ play_cwd }}/infra/monitoring"
-        dest: /portfolio-system/infra/monitoring
+        src: "{{ project_root }}/infra/monitoring"
+        dest: ~/portfolio-system/infra/monitoring
         owner: "{{ ansible_facts['user_id'] }}"
         group: "{{ ansible_facts['user_id'] }}"
         mode: '0644'
 
     - name: Copy reverse-proxy directory to server
       ansible.builtin.copy:
-        src: "{{ play_cwd }}/infra/reverse-proxy"
-        dest: /portfolio-system/infra/reverse-proxy
+        src: "{{ project_root }}/infra/reverse-proxy"
+        dest: ~/portfolio-system/infra/reverse-proxy
         owner: "{{ ansible_facts['user_id'] }}"
         group: "{{ ansible_facts['user_id'] }}"
         mode: '0644'
 
     - name: Create .env file
       ansible.builtin.template:
-        src: "{{ play_cwd }}/.env.runtime.j2"
-        dest: /portfolio-system/.env.production
+        src: "{{ project_root }}/.env.runtime.j2"
+        dest: ~/portfolio-system/.env.production
         owner: "{{ ansible_facts['user_id'] }}"
         group: "{{ ansible_facts['user_id'] }}"
         mode: '0644'
@@ -45,7 +45,7 @@
     - name: Start Docker Compose Services
       community.docker.docker_compose_v2:
         api_version: auto
-        project_src: /portfolio-system
+        project_src: ~/portfolio-system
         files:
           - compose.prod.yaml
         env_files:

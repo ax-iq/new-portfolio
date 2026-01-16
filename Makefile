@@ -125,12 +125,12 @@ start-dev:
 # generate-hashed-password:
 # 	echo "username:hashed_password = $(htpasswd -nbB username password)"
 
-sync-database-dev: LOCATION=/portfolio-system/new-backend/sqlite-prod-data
+sync-database-dev: LOCATION=~/portfolio-system/new-backend/sqlite-prod-data
 sync-database-dev:
 	sudo mkdir -p  ${LOCATION} && \
 		sudo cp -r ./new-backend/sqlite-prod-data/* ${LOCATION}
 
-sync-config-dev: CONFIG_PATH=/portfolio-system/infra/monitoring
+sync-config-dev: CONFIG_PATH=~/portfolio-system/infra/monitoring
 sync-config-dev:
 	sudo mkdir -p  ${CONFIG_PATH} && \
 		sudo cp -r ./infra/monitoring/* ${CONFIG_PATH}
