@@ -74,6 +74,7 @@
         images: true
         images_filters:
           dangling: true
+        timeout: 120
 
     # TODO
     # - name: Limit outbound data transfer
