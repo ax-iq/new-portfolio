@@ -1,11 +1,19 @@
 # Used by git pre-commit hook
 pre-commit: format lint test
 
-ci: check
+ci-install-dependencies-frontend:
+	pnpm install --dangerously-allow-all-builds
+	pnpm dlx playwright install --with-deps
+ci-build-frontend:
+	pnpm run build
+ci-lint-frontend: lint
+ci-test-frontend: test
+ci-check-types-frontend:
+	pnpm run check:types
+ci-check-frontend: check
 
 check: lint test
-
-lint: lint-lang
+lint: lint-lang lint-format
 
 run:
 	pnpm dev
@@ -15,6 +23,9 @@ format:
 
 lint-lang:
 	pnpm run lint:lang
+
+lint-format:
+	pnpm run lint:format
 
 test:
 	pnpm run test:ci

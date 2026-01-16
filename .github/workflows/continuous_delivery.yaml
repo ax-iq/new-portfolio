@@ -1,4 +1,5 @@
-name: Deploy
+---
+name: Continuous Delivery
 
 on:
   push:
@@ -15,18 +16,17 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "lts/*"
 
       - name: Install semantic-release
         run: |
           npm install -g semantic-release \
-            @semantic-release/commit-analyzer \
-            @semantic-release/release-notes-generator \
-            @semantic-release/github \
             @semantic-release/git \
             @semantic-release/changelog
 
@@ -35,45 +35,110 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
 
-  push_to_registry:
-    name: Push To Docker Hub
+  build_and_push_to_registry:
+    name: Build And Push To Docker Hub
     runs-on: ubuntu-latest
     needs: release
-    # environment: production
     outputs:
-      system_version: ${{ steps.meta.outputs.tags_new_release_version }}
+      system_version: ${{ steps.meta-frontend.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Extract Docker image metadata
-        id: meta
+      - name: Extract Frontend Metadata
+        id: meta-frontend
         uses: docker/metadata-action@v5
         with:
-          images: ${{ vars.DOCKER_USERNAME }}/my-image
+          images: |
+            ${{ vars.REPO_NAMESPACE }}/frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+          bake-target: frontend
 
-      - name: Log in to Docker Hub
+      - name: Extract Backend Metadata
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ vars.REPO_NAMESPACE }}/backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+          bake-target: backend
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
+      - name: Build And Push Docker Images
+        uses: docker/bake-action@v6
+        env:
+          CF_DNS_API_TOKEN: ${{ secrets.CF_DNS_API_TOKEN }}
+          ADMIN_AUTH_CREDENTIALS: ${{ secrets.ADMIN_AUTH_CREDENTIALS }}
+          DNS_EMAIL: ${{ vars.DNS_EMAIL }}
+          CERTIFICATE_RESOLVER_NAME: ${{ vars.CERTIFICATE_RESOLVER_NAME }}
+          CA_SERVER: ${{ vars.CA_SERVER }}
+          FRONTEND_NODE_VERSION: ${{ vars.FRONTEND_NODE_VERSION }}
+          FRONTEND_PNPM_VERSION: ${{ vars.FRONTEND_PNPM_VERSION }}
+          SITE_NAME: ${{ vars.SITE_NAME }}
+          REPO_NAMESPACE: ${{ vars.REPO_NAMESPACE }}
+          SYSTEM_VERSION: dynamic
+          API_URL: ${{ vars.API_URL }}
+          BACKEND_BASE_URL: ${{ vars.BACKEND_BASE_URL }}
+          PRIMARY_DOMAIN: ${{ vars.PRIMARY_DOMAIN }}
+          BACKEND_NODE_VERSION: ${{ vars.BACKEND_NODE_VERSION }}
+          BACKEND_PNPM_VERSION: ${{ vars.BACKEND_PNPM_VERSION }}
+          DATABASE_CLIENT: ${{ vars.DATABASE_CLIENT }}
+          DATABASE_HOST: ${{ vars.DATABASE_HOST }}
+          DATABASE_NAME: ${{ vars.DATABASE_NAME }}
+          DATABASE_USERNAME: ${{ vars.DATABASE_USERNAME }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          APP_KEYS: ${{ secrets.APP_KEYS }}
+          API_TOKEN_SALT: ${{ secrets.API_TOKEN_SALT }}
+          ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+          TRANSFER_TOKEN_SALT: ${{ secrets.TRANSFER_TOKEN_SALT }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NODE_ENV: ${{ vars.NODE_ENV }}
+          STRAPI_TELEMETRY_DISABLED: true
+          DATABASE_FILENAME: ${{ vars.DATABASE_FILENAME }}
         with:
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          annotations: ${{ steps.meta.outputs.annotations }}
-          provenance: true
+          source: .
+          targets: frontend,backend
+          files: |
+            compose.prod.yaml
+            cwd://${{ steps.meta-frontend.outputs.bake-file-tags }}
+            cwd://${{ steps.meta-frontend.outputs.bake-file-labels }}
+            cwd://${{ steps.meta-frontend.outputs.bake-file-annotations }}
+            cwd://${{ steps.meta-backend.outputs.bake-file-tags }}
+            cwd://${{ steps.meta-backend.outputs.bake-file-labels }}
+            cwd://${{ steps.meta-backend.outputs.bake-file-annotations }}
           sbom: true
+          provenance: true
+          pull: false
+          push: true
   
   deploy:
-    name: Deploy to Server
+    name: Deploy To Server
     runs-on: ubuntu-latest
-    needs: push_to_registry
+    needs: build_and_push_to_registry
     steps:
       - name: Checkout Code Source
         uses: actions/checkout@v5
@@ -83,47 +148,43 @@ jobs:
         with:
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           ssh_host: ${{ vars.SSH_HOST }}
-          ssh_user: ${{ vars.USER }}
+          ssh_user: ${{ vars.SSH_USER }}
 
-      - name: Deploy via Ansible
+      - name: Deploy Via Ansible
+        working-directory: ./infra/automation/ansible
         run: |
-          ansible-playbook ${{ github.workspace }}/infra/automation/ansible/deploy-playbook.yaml \
-          -i ${{ github.workspace }}/infra/automation/ansible/inventory.yaml \
+          ansible-playbook \
+          -i inventories/inventory.yaml \
           -u ${{ vars.SSH_USER }} \
-          --extra-vars \ 
-          
-          "system_version=${{ needs.push_to_registry.outputs.system_version }} \
-          
-          cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }} \
-          frontend_node_version=${{ vars.FRONTEND_NODE_VERSION }} \
-          frontend_pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }} \
-
-          backend_pnpm_version=${{ vars.BACKEND_PNPM_VERSION }} \
-          backend_node_version=${{ vars.BACKEND_NODE_VERSION }} \
-
-          api_url=${{ vars.API_URL }} \
-          backend_base_url=${{ vars.BACKEND_BASE_URL }} \
-
-          database_client=${{ vars.DATABASE_CLIENT }} \
-          database_name=${{ vars.DATABASE_NAME }} \
-          database_username=${{ vars.DATABASE_USERNAME }} \
-          database_password=${{ secrets.DATABASE_PASSWORD }} \
-          database_port=${{ vars.DATABASE_PORT }} \
-          jwt_token=${{ secrets.JWT_SECRET }} \
-          app_keys=${{ secrets.APP_KEYS }} \
-          admin_jwt_secret=${{ secrets.ADMIN_JWT_SECRET }} \
-          encryption_key=${{ secrets.ENCRYPTION_KEY }} \
-          api_token_salt=${{ secrets.API_TOKEN_SALT }} \
-          transfer_token_salt=${{ secrets.TRANSFER_TOKEN_SALT }} \
-          database_filename=${{ vars.DATABASE_FILENAME }} \
-          strapi_telemetry_disabled=${{ vars.STRAPI_TELEMETRY_DISABLED }} \
-
-          node_env=${{ vars.NODE_ENV }}
-          admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}
-          
-          pimary_domain=${{ vars.PRIMARY_DOMAIN }}
-          site_name=${{ vars.SITE_NAME }}
-          repo_namespace=${{ vars.REPO_NAMESPACE }}
-          dns_email=${{ vars.DNS_EMAIL }}
-          certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}
-          ca_server=${{ vars.CA_SERVER }}"
+          --private-key ~/.ssh/id_rsa \
+          -e "system_version=${{ needs.build_and_push_to_registry.outputs.system_version }}" \
+          -e "cf_dns_api_token=${{ secrets.CF_DNS_API_TOKEN }}" \
+          -e "frontend_node_version=${{ vars.FRONTEND_NODE_VERSION }}" \
+          -e "frontend_pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }}" \
+          -e "backend_pnpm_version=${{ vars.BACKEND_PNPM_VERSION }}" \
+          -e "backend_node_version=${{ vars.BACKEND_NODE_VERSION }}" \
+          -e "api_url=${{ vars.API_URL }}" \
+          -e "backend_base_url=${{ vars.BACKEND_BASE_URL }}" \
+          -e "database_client=${{ vars.DATABASE_CLIENT }}" \
+          -e "database_name=${{ vars.DATABASE_NAME }}" \
+          -e "database_username=${{ vars.DATABASE_USERNAME }}" \
+          -e "database_password=${{ secrets.DATABASE_PASSWORD }}" \
+          -e "database_port=${{ vars.DATABASE_PORT }}" \
+          -e "jwt_token=${{ secrets.JWT_SECRET }}" \
+          -e "app_keys=${{ secrets.APP_KEYS }}" \
+          -e "admin_jwt_secret=${{ secrets.ADMIN_JWT_SECRET }}" \
+          -e "encryption_key=${{ secrets.ENCRYPTION_KEY }}" \
+          -e "api_token_salt=${{ secrets.API_TOKEN_SALT }}" \
+          -e "transfer_token_salt=${{ secrets.TRANSFER_TOKEN_SALT }}" \
+          -e "database_filename=${{ vars.DATABASE_FILENAME }}" \
+          -e "strapi_telemetry_disabled=${{ vars.STRAPI_TELEMETRY_DISABLED }}" \
+          -e "node_env=${{ vars.NODE_ENV }}" \
+          -e 'admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}' \
+          -e "pimary_domain=${{ vars.PRIMARY_DOMAIN }}" \
+          -e "site_name=${{ vars.SITE_NAME }}" \
+          -e "repo_namespace=${{ vars.REPO_NAMESPACE }}" \
+          -e "dns_email=${{ vars.DNS_EMAIL }}" \
+          -e "certificate_resolver_name=${{ vars.CERTIFICATE_RESOLVER_NAME }}" \
+          -e "ca_server=${{ vars.CA_SERVER }}" \
+          -e "ansible_host=${{ vars.SSH_HOST }}" \
+          playbook_deploy.yaml

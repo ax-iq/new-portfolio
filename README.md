@@ -24,7 +24,25 @@ click on the file ***new-portfolio.code-workspace*** and then click on the blue 
 
 ## Local Development Environment Setup
 
-Dev Containers (recommended)
+[Dev Containers](.devcontainer/devcontainer.json) (recommended)
+
+The current installed packages inside the devcontainer are:
+
+<center>
+
+| Name          |
+|:-------------:|
+| Python        |
+| NVM           |
+| Node.js       |
+| PNPM          |
+| Ansible       |
+| Terraform     |
+| Graphviz      |
+| Sqlite3       |
+| apache2-utils |
+
+</center>
 
 - System requirements:
 
@@ -78,7 +96,7 @@ Visit the UIs:
 
 - [Reverse Proxy Dashboard](https://traefik.localhost) (https://traefik.localhost)
 
-- [Grafana Dashboard](https://grafana.localhost) (https://traefik.localhost)
+- [Grafana Dashboard](https://grafana.localhost) (https://grafana.localhost)
 
 **Note:** 
 - You will get a security warning in the browser. It is a normal behavior as we use a self-signed SSL certificate for local development.

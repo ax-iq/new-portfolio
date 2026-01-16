@@ -158,6 +158,8 @@ It is activated on each merge/push to the branch **"main"**.
 
 8 services are deployed via docker compose. The services are listed in the followind table.
 
+<center>
+
 |N°   | Service Name  | Detail              |
 |:---:|:-------------:|:-------------------:|
 |1    |reverse-proxy  |traefik              |
@@ -170,6 +172,7 @@ It is activated on each merge/push to the branch **"main"**.
 |8    |tempo          |traces backend       |
 |9    |grafana        |events vizualisation |
 
+</center>
 
 ## Observability / Monitoring
 

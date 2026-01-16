@@ -15,9 +15,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-
     - name: Install Python
       uses: actions/setup-python@v6
       with:
@@ -36,11 +33,11 @@ runs:
         SSH_USER: ${{ inputs.ssh_user }}
       run: |
         mkdir -p ~/.ssh
-        echo "${ SSH_PRIVATE_KEY }" ~/.ssh/id_rsa
+        echo "${SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${ SSH_HOST } >> ~/.ssh/known_hosts
+        ssh-keyscan -v -t rsa -p 22 ${SSH_HOST} >> ~/.ssh/known_hosts
       shell: bash
 
-    - name: Test SSH Connection
-      run: ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${SSH_USER}@${vars.SSH_HOST} "echo Connected!"
-      shell: bash
+    # - name: Test SSH Connection
+    #   run: ssh -i ~/.ssh/id_rsa ${SSH_USER}@${SSH_HOST} "echo Connected!"
+    #   shell: bash

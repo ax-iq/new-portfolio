@@ -1,4 +1,0 @@
-servers:
-  hosts:
-    my_host_01:
-      ansible_host: ubuntu

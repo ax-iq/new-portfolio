@@ -1,4 +1,5 @@
-name: Provision Server
+---
+name: Import Existing Infrastructure
 
 on:
   workflow_dispatch:
@@ -13,8 +14,8 @@ on:
           - dev
 
 jobs:
-  provision:
-    name: Provision Server
+  import-infra:
+    name: Import Current GCP Infrastructure
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
@@ -40,26 +41,23 @@ jobs:
       - name: Select Project
         run: gcloud config set project ${{ vars.GCP_PROJECT_ID }}
 
-      - name: Init Terraform Directory / Download Providers
-        run: | 
+      - name: Init Terraform Directory / Download Providers [infra]
+        run: |
           terraform init \
           -backend-config="bucket=${{ vars.BUCKET_NAME }}" \
           -input=false
 
       # Terraform workspaces for dev/prod envinronments
       - name: Select Workspace
-        run: |
-          terraform workspace select \
-          -or-create=true \
-          ${{ github.event.inputs.environment }}
+        run: terraform workspace select -or-create=true ${{ github.event.inputs.environment }}
 
-      - name: Check Format & Validate Terraform files
+      - name: Check Format & Validate Terraform files [infra]
         run: | 
           terraform fmt -check
           terraform validate
 
-      - name: Terraform Plan
-        env: 
+      - name: Import Existing Infrastructure
+        env:
           TF_LOG: DEBUG
           TF_VAR_ssh_user: ${{ vars.SSH_USER }}
           TF_VAR_ssh_public_key: ${{ vars.SSH_PUBLIC_KEY }}
@@ -67,16 +65,10 @@ jobs:
           TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
           TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
         run: |
-          terraform plan -input=false
-
-      - name: Provision Server
-        env: 
-          TF_LOG: DEBUG
-          TF_VAR_ssh_user: ${{ vars.SSH_USER }}
-          TF_VAR_ssh_public_key: ${{ vars.SSH_PUBLIC_KEY }}
-          TF_VAR_region: ${{ vars.BUCKET_LOCATION }}
-          TF_VAR_project: ${{ vars.GCP_PROJECT_ID }}
-          TF_VAR_bucket_name: ${{ vars.BUCKET_NAME }}
-        run: |
-          terraform apply -auto-approve -input=false \
-          -var-file=../env/${{ github.event.inputs.environment }}/vars.tfvars
+          # terraform import -input=false google_storage_bucket.tf_backend ${{ vars.BUCKET_NAME }}
+          # terraform import -input=false google_compute_disk.persistent vm-disk-prod-97532680
+          # terraform import -input=false google_compute_network.vpc_network vpc-network-prod-97532680
+          # terraform import -input=false google_compute_firewall.https projects/portfolio-prod-97532680/global/firewalls/https-access
+          terraform import -input=false google_compute_firewall.default projects/portfolio-prod-97532680/global/firewalls/http-access
+          terraform import -input=false google_compute_image.ubuntu_with_disk projects/portfolio-prod-97532680/global/images/ubuntu-with-disk-image-prod-97532680
+          terraform import -input=false google_compute_firewall.ssh projects/portfolio-prod-97532680/global/firewalls/ssh

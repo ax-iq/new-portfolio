@@ -3,9 +3,6 @@ import NavBar from "@/components/organisms/NavBar/NavBar";
 import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import Footer from "@/components/organisms/Footer/Footer";
-import type ApiResponseGlobal from "@/interfaces/ApiResponseGlobal";
-import ContentType from "@/interfaces/ContentType";
-import { fetchApi } from "@/utils/strapi/strapi";
 
 const currentPagePath = Astro.url.pathname;
 const locale = Astro.params.locale;

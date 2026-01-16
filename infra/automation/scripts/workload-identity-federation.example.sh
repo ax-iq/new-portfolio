@@ -1,7 +1,9 @@
-# RUN DIRECTLY ON GOOGLE CLOUD SHELL
+# 
+# RUN DIRECTLY ON GOOGLE CLOUD SHELL.
 # This script is idempotent meaning that
 # it will skip resources creation if they
 # already exist.
+# 
 
 # !!!!! Replace the variable names to match the GCP account
 BILLING_ACCOUNT_ID=billing-id
@@ -96,12 +98,6 @@ WORKLOAD_IDENTITY_PROVIDER=$(gcloud iam workload-identity-pools providers descri
                             --workload-identity-pool=${POOL_ID} \
                             --format="value(name)")
 
-# Bind roles
-# gcloud secrets add-iam-policy-binding "my-secret" \
-#   --project="${PROJECT_ID}" \
-#   --role="roles/secretmanager.secretAccessor" \
-#   --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
-
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --role="roles/compute.admin" \
   --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
@@ -114,18 +110,26 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --role="roles/secretmanager.secretAccessor" \
   --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
 
+# Persmission to enable API
 gcloud projects add-iam-policy-binding ${PROJECT_ID} \
   --role="roles/iam.serviceAccountUser" \
   --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
 
+# Permission to enable API
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --role="roles/serviceusage.serviceUsageAdmin" \
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
+
+# Permission to create service accounts
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --role="roles/iam.serviceAccountAdmin" \
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
+
+# Project Admin
+gcloud projects add-iam-policy-binding ${PROJECT_ID} \
+  --role="roles/resourcemanager.projectIamAdmin" \
+  --member="principalSet://iam.googleapis.com/${WORKLOAD_IDENTITY_POOL_ID}/attribute.repository/${REPO}"
+
+echo "***************************************************************************"
 echo "GCP_WORKLOAD_IDENTITY_PROVIDER=${WORKLOAD_IDENTITY_PROVIDER}"
 echo "GCP_PROJECT_ID=${PROJECT_ID}"
-
-# Setup terraform backend with Cloud Storage (already done in automated workflow)
-# gcloud projects add-iam-policy-binding ${PROJECT_ID} \
-#   --role="roles/storage.admin" \
-#   --member="user:${USER_ID}"
-
-# *************************************************************************** #
-
-# *************************************************************************** #

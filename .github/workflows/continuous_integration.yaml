@@ -1,0 +1,91 @@
+name: Continuous Integration
+
+on: 
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    name: Build And Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [
+          {
+            name: 'frontend', 
+            dir: 'new-frontend'
+          }
+        ]
+    defaults:
+      run:
+        working-directory:  ${{ matrix.app.dir }}
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Set Variables
+        id: set_vars
+        run: |
+          case "${{ matrix.app.name }}" in 
+            frontend)
+              echo "pnpm_version=${{ vars.FRONTEND_PNPM_VERSION }}" >> $GITHUB_OUTPUT
+              echo "node_version=${{ vars.FRONTEND_NODE_VERSION }}" >> $GITHUB_OUTPUT
+              ;;
+            backend)
+              echo "pnpm_version=${{ vars.BACKEND_PNPM_VERSION }}" >> $GITHUB_OUTPUT
+              echo "node_version=${{ vars.BACKEND_NODE_VERSION }}" >> $GITHUB_OUTPUT
+              ;;
+          esac
+
+      - name: Install Pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ steps.set_vars.outputs.pnpm_version }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ steps.set_vars.outputs.node_version }}
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: make ci-install-dependencies-${{ matrix.app.name }}
+      - name: Lint
+        run: make ci-lint-${{ matrix.app.name }}
+      - name: Build
+        run: make ci-build-${{ matrix.app.name }}
+      - name: Check Types
+        run: make ci-check-types-${{ matrix.app.name }}        
+      - name: Test
+        run: make ci-test-${{ matrix.app.name }}
+
+  check_configs:
+    name: "Check Configurations"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code Source
+        uses: actions/checkout@v5
+
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Install ansible And ansible-lint
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install ansible==13.2.0
+          python3 -m pip install ansible-lint==26.1.0
+        shell: bash
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.3"
+
+      - name: Lint Terraform
+        run: make ci-lint-terraform
+
+      - name: Lint Ansible Playbooks and Inventories
+        run: make ci-lint-ansible
