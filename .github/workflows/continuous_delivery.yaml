@@ -91,7 +91,7 @@ jobs:
         uses: docker/bake-action@v6
         env:
           CF_DNS_API_TOKEN: ${{ secrets.CF_DNS_API_TOKEN }}
-          ADMIN_AUTH_CREDENTIALS: '${{ secrets.ADMIN_AUTH_CREDENTIALS }}'
+          ADMIN_AUTH_CREDENTIALS: ${{ secrets.ADMIN_AUTH_CREDENTIALS }}
           DNS_EMAIL: ${{ vars.DNS_EMAIL }}
           CERTIFICATE_RESOLVER_NAME: ${{ vars.CERTIFICATE_RESOLVER_NAME }}
           CA_SERVER: ${{ vars.CA_SERVER }}
@@ -179,7 +179,7 @@ jobs:
           -e "database_filename=${{ vars.DATABASE_FILENAME }}" \
           -e "strapi_telemetry_disabled=${{ vars.STRAPI_TELEMETRY_DISABLED }}" \
           -e "node_env=${{ vars.NODE_ENV }}" \
-          -e "admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}" \
+          -e 'admin_auth_credentials=${{ secrets.ADMIN_AUTH_CREDENTIALS }}' \
           -e "pimary_domain=${{ vars.PRIMARY_DOMAIN }}" \
           -e "site_name=${{ vars.SITE_NAME }}" \
           -e "repo_namespace=${{ vars.REPO_NAMESPACE }}" \
