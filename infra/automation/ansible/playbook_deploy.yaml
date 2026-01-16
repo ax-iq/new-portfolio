@@ -62,7 +62,7 @@
         state: present
         build: never
         remove_orphans: true
-        pull: always
+        pull: missing
         services:
           - reverse-proxy
           - frontend
