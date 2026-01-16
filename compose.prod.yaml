@@ -126,7 +126,7 @@ services:
         - BACKEND_PNPM_VERSION=${BACKEND_PNPM_VERSION}
     image: "${REPO_NAMESPACE}/backend:${SYSTEM_VERSION}"
     volumes:
-      - ./new-backend/sqlite-prod-data:/opt/strapi-app/sqlite-prod-data:rw
+      - ~/.new-backend/sqlite-prod-data:/opt/strapi-app/sqlite-prod-data:rw
     environment:
       DATABASE_CLIENT: ${DATABASE_CLIENT}
       DATABASE_HOST: strapiDB
